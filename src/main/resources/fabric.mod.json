@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "echelon-core",
+  "version": "${version}",
+  "name": "Echelon Core",
+  "description": "Echelon gameplay systems built on Crazy World Progression.",
+  "authors": ["Leon Hosch"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["ekuzo.echeloncore.EchelonCore"],
+    "client": ["ekuzo.echeloncore.client.EchelonCoreClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "~26.2",
+    "java": ">=25",
+    "fabric-api": "*",
+    "crazy-world-progression": ">=1.0.0"
+  }
+}
