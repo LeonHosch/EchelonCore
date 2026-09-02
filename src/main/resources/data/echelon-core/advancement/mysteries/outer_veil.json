@@ -1,0 +1,12 @@
+{
+  "parent": "echelon-core:mysteries/root",
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "icon": { "id": "minecraft:crying_obsidian" },
+    "title": { "translate": "advancement.echelon-core.mysteries.outer_veil.title" },
+    "description": { "translate": "advancement.echelon-core.mysteries.outer_veil.description" },
+    "frame": "challenge",
+    "announce_to_chat": false
+  },
+  "sends_telemetry_event": false
+}

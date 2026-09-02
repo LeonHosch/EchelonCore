@@ -1,0 +1,12 @@
+{
+  "parent": "echelon-core:mysteries/veil_level",
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "icon": { "id": "minecraft:golden_helmet" },
+    "title": { "translate": "advancement.echelon-core.mysteries.crowned.title" },
+    "description": { "translate": "advancement.echelon-core.mysteries.crowned.description" },
+    "frame": "challenge",
+    "announce_to_chat": true
+  },
+  "sends_telemetry_event": false
+}

@@ -1,0 +1,12 @@
+{
+  "parent": "echelon-core:mysteries/root",
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "icon": { "id": "minecraft:flint_and_steel" },
+    "title": { "translate": "advancement.echelon-core.mysteries.nether.title" },
+    "description": { "translate": "advancement.echelon-core.mysteries.nether.description" },
+    "frame": "goal",
+    "announce_to_chat": false
+  },
+  "sends_telemetry_event": false
+}

@@ -1,0 +1,13 @@
+{
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "background": "minecraft:block/oak_planks",
+    "icon": { "id": "minecraft:oak_log" },
+    "title": { "translate": "advancement.echelon-core.woodworking.root.title" },
+    "description": { "translate": "advancement.echelon-core.woodworking.root.description" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "sends_telemetry_event": false
+}

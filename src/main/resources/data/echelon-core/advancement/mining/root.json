@@ -1,0 +1,13 @@
+{
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "background": "minecraft:block/deepslate",
+    "icon": { "id": "minecraft:stone_pickaxe" },
+    "title": { "translate": "advancement.echelon-core.mining.root.title" },
+    "description": { "translate": "advancement.echelon-core.mining.root.description" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "sends_telemetry_event": false
+}

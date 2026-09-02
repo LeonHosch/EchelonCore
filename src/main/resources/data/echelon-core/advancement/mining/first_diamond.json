@@ -1,0 +1,12 @@
+{
+  "parent": "echelon-core:mining/first_iron",
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "icon": { "id": "minecraft:diamond" },
+    "title": { "translate": "advancement.echelon-core.mining.first_diamond.title" },
+    "description": { "translate": "advancement.echelon-core.mining.first_diamond.description" },
+    "frame": "goal",
+    "announce_to_chat": false
+  },
+  "sends_telemetry_event": false
+}

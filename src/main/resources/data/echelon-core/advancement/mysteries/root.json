@@ -1,0 +1,13 @@
+{
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "background": "minecraft:gui/advancements/backgrounds/adventure",
+    "icon": { "id": "minecraft:echo_shard" },
+    "title": { "translate": "advancement.echelon-core.mysteries.root.title" },
+    "description": { "translate": "advancement.echelon-core.mysteries.root.description" },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "sends_telemetry_event": false
+}

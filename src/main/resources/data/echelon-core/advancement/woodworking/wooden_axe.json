@@ -1,0 +1,12 @@
+{
+  "parent": "echelon-core:woodworking/crafting_table",
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "icon": { "id": "minecraft:wooden_axe" },
+    "title": { "translate": "advancement.echelon-core.woodworking.wooden_axe.title" },
+    "description": { "translate": "advancement.echelon-core.woodworking.wooden_axe.description" },
+    "frame": "task",
+    "announce_to_chat": false
+  },
+  "sends_telemetry_event": false
+}

@@ -1,0 +1,1 @@
+{"parent":"echelon-core:farming/root","criteria":{"earned":{"trigger":"minecraft:impossible"}},"display":{"icon":{"id":"minecraft:wheat"},"title":{"translate":"advancement.echelon-core.farming.harvests_100.title"},"description":{"translate":"advancement.echelon-core.farming.harvests_100.description"},"frame":"task","announce_to_chat":false},"sends_telemetry_event":false}

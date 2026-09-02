@@ -1,0 +1,12 @@
+{
+  "parent": "echelon-core:woodworking/logs_100",
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "icon": { "id": "minecraft:diamond_axe" },
+    "title": { "translate": "advancement.echelon-core.woodworking.logs_1000.title" },
+    "description": { "translate": "advancement.echelon-core.woodworking.logs_1000.description" },
+    "frame": "goal",
+    "announce_to_chat": false
+  },
+  "sends_telemetry_event": false
+}

@@ -1,0 +1,12 @@
+{
+  "parent": "echelon-core:mining/root",
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "icon": { "id": "minecraft:coal" },
+    "title": { "translate": "advancement.echelon-core.mining.first_coal.title" },
+    "description": { "translate": "advancement.echelon-core.mining.first_coal.description" },
+    "frame": "task",
+    "announce_to_chat": false
+  },
+  "sends_telemetry_event": false
+}

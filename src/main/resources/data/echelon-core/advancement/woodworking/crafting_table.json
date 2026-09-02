@@ -1,0 +1,12 @@
+{
+  "parent": "echelon-core:woodworking/root",
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "icon": { "id": "minecraft:crafting_table" },
+    "title": { "translate": "advancement.echelon-core.woodworking.crafting_table.title" },
+    "description": { "translate": "advancement.echelon-core.woodworking.crafting_table.description" },
+    "frame": "task",
+    "announce_to_chat": false
+  },
+  "sends_telemetry_event": false
+}

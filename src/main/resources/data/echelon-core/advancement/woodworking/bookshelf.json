@@ -1,0 +1,12 @@
+{
+  "parent": "echelon-core:woodworking/chest",
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "icon": { "id": "minecraft:bookshelf" },
+    "title": { "translate": "advancement.echelon-core.woodworking.bookshelf.title" },
+    "description": { "translate": "advancement.echelon-core.woodworking.bookshelf.description" },
+    "frame": "goal",
+    "announce_to_chat": false
+  },
+  "sends_telemetry_event": false
+}

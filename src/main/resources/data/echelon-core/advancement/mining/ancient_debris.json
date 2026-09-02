@@ -1,0 +1,12 @@
+{
+  "parent": "echelon-core:mining/first_diamond",
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "icon": { "id": "minecraft:ancient_debris" },
+    "title": { "translate": "advancement.echelon-core.mining.ancient_debris.title" },
+    "description": { "translate": "advancement.echelon-core.mining.ancient_debris.description" },
+    "frame": "challenge",
+    "announce_to_chat": true
+  },
+  "sends_telemetry_event": false
+}

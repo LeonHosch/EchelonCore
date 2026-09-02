@@ -1,0 +1,12 @@
+{
+  "parent": "echelon-core:mysteries/nether",
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "icon": { "id": "minecraft:end_stone" },
+    "title": { "translate": "advancement.echelon-core.mysteries.end.title" },
+    "description": { "translate": "advancement.echelon-core.mysteries.end.description" },
+    "frame": "challenge",
+    "announce_to_chat": true
+  },
+  "sends_telemetry_event": false
+}

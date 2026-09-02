@@ -1,0 +1,12 @@
+{
+  "parent": "echelon-core:mysteries/root",
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "icon": { "id": "minecraft:heart_of_the_sea" },
+    "title": { "translate": "advancement.echelon-core.mysteries.powerful_soul.title" },
+    "description": { "translate": "advancement.echelon-core.mysteries.powerful_soul.description" },
+    "frame": "goal",
+    "announce_to_chat": false
+  },
+  "sends_telemetry_event": false
+}

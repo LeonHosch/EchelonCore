@@ -1,0 +1,13 @@
+{
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "background": "minecraft:block/hay_block",
+    "icon": { "id": "minecraft:iron_hoe" },
+    "title": { "translate": "advancement.echelon-core.farming.root.title" },
+    "description": { "translate": "advancement.echelon-core.farming.root.description" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "sends_telemetry_event": false
+}

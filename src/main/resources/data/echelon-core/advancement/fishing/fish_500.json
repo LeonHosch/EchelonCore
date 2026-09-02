@@ -1,0 +1,1 @@
+{"parent":"echelon-core:fishing/fish_100","criteria":{"earned":{"trigger":"minecraft:impossible"}},"display":{"icon":{"id":"minecraft:pufferfish"},"title":{"translate":"advancement.echelon-core.fishing.fish_500.title"},"description":{"translate":"advancement.echelon-core.fishing.fish_500.description"},"frame":"goal","announce_to_chat":false},"sends_telemetry_event":false}

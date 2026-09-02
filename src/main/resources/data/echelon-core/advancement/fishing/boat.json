@@ -1,0 +1,1 @@
+{"parent":"echelon-core:fishing/fishing_rod","criteria":{"earned":{"trigger":"minecraft:impossible"}},"display":{"icon":{"id":"minecraft:oak_boat"},"title":{"translate":"advancement.echelon-core.fishing.boat.title"},"description":{"translate":"advancement.echelon-core.fishing.boat.description"},"frame":"task","announce_to_chat":false},"sends_telemetry_event":false}

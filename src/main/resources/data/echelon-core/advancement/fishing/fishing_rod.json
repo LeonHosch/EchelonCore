@@ -1,0 +1,1 @@
+{"parent":"echelon-core:fishing/root","criteria":{"earned":{"trigger":"minecraft:impossible"}},"display":{"icon":{"id":"minecraft:fishing_rod"},"title":{"translate":"advancement.echelon-core.fishing.fishing_rod.title"},"description":{"translate":"advancement.echelon-core.fishing.fishing_rod.description"},"frame":"task","announce_to_chat":false},"sends_telemetry_event":false}

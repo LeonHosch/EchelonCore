@@ -1,0 +1,13 @@
+{
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "background": "minecraft:block/prismarine",
+    "icon": { "id": "minecraft:fishing_rod" },
+    "title": { "translate": "advancement.echelon-core.fishing.root.title" },
+    "description": { "translate": "advancement.echelon-core.fishing.root.description" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "sends_telemetry_event": false
+}

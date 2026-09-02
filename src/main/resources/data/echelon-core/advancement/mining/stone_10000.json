@@ -1,0 +1,12 @@
+{
+  "parent": "echelon-core:mining/stone_1000",
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } },
+  "display": {
+    "icon": { "id": "minecraft:deepslate" },
+    "title": { "translate": "advancement.echelon-core.mining.stone_10000.title" },
+    "description": { "translate": "advancement.echelon-core.mining.stone_10000.description" },
+    "frame": "challenge",
+    "announce_to_chat": true
+  },
+  "sends_telemetry_event": false
+}
