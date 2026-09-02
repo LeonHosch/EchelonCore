@@ -1,0 +1,132 @@
+# Personal tabs are unlocked independently for every player.
+skilltree: personal
+priority: 1
+name: A New Beginning
+gname: Ein Neuanfang
+icon: minecraft:player_head
+
+skills:
+  - id: bandaging
+    name: Bandaging
+    gname: Bandagieren
+    description: Gain a heart.
+    beschreibung: Erhalte ein Herz
+    icon: minecraft:paper
+    previous: none
+    following: 0
+    costs:
+      echelon_points: 5
+    stats:
+      - addHealth(2)
+
+  - id: further_bandaging
+    name: Further Bandaging
+    gname: Weiter Bandagieren
+    description: Gain a heart
+    beschreibung: Erhalte ein Herz
+    icon: minecraft:paper
+    previous: bandaging
+    following: 0
+    costs:
+      echelon_points: 10
+    stats:
+      - addHealth(2)
+
+  - id: first_steps
+    name: First Steps
+    gname: Erste Schritte
+    description: Gain 2% movement speed
+    beschreibung: Erhalte 2% Bewegungsgeschwindigkeit
+    icon: minecraft:leather_boots
+    previous: none
+    following: 0
+    costs:
+      echelon_points: 5
+    stats:
+      - addMovementSpeed(2)
+
+  - id: keep_walking
+    name: Keep Walking
+    gname: Weitergehen
+    description: Gain 2% movement speed
+    beschreibung: Erhalte 2% Bewegungsgeschwindigkeit
+    icon: minecraft:chainmail_boots
+    previous: first_steps
+    following: 0
+    costs:
+      echelon_points: 10
+    stats:
+      - addMovementSpeed(2)
+
+  - id: back_on_track
+    name: Back On Track
+    gname: Zurück zur Laufbahn
+    description: Gain 2% movement speed
+    beschreibung: Erhalte 2% Bewegungsgeschwindigkeit
+    icon: minecraft:golden_boots
+    previous: keep_walking
+    following: 0
+    costs:
+      echelon_points: 15
+    stats:
+      - addMovementSpeed(2)
+
+  - id: rebreathing_energy
+    name: Refreshing Energy
+    gname: Erfrischende Energie
+    description: Gain half a heart and 2% movement speed
+    beschreibung: Erhalte ein halbes Herz und 2% Bewegungsgeschwindigkeit
+    icon: minecraft:glistering_melon_slice
+    previous:
+      - back_on_track
+      - further_bandaging
+    following: 0
+    costs:
+      echelon_points: 25
+    stats:
+      - addHealth(1)
+      - addMovementSpeed(2)
+
+  - id: old_picky
+    name: Ol' Picky
+    gname: Alte Hacke
+    description: Gain 5% mining speed
+    beschreibung: Erhalte 5% Abbaugeschwindigkeit
+    icon: minecraft:wooden_pickaxe
+    previous: none
+    following: 0
+    costs:
+      echelon_points: 15
+    stats:
+      - addMiningSpeed(5)
+
+  - id: yearned_for_the_mines
+    name: Yearning For The Mines
+    gname: Sehnen Nach Den Minen
+    description: Gain 10% mining speed
+    beschreibung: Erhalte 10% Abbaugeschwindigkeit
+    icon: minecraft:stone_pickaxe
+    previous:
+      - old_picky
+    following: 0
+    costs:
+      echelon_points: 25
+    stats:
+      - addMiningSpeed(10)
+  
+  - id: born_anew
+    name: Born Anew
+    gname: Erneut Geboren
+    description: Gain 1 heart, 5% mining speed and 2% movement speed
+    beschreibung: Erhalte 1 Herz, 5% Abbaugeschwindigkeit und 2% Bewegungsgeschwindigkeit
+    icon: minecraft:totem_of_undying
+    previous:
+      - rebreathing_energy
+      - yearned_for_the_mines
+    following: 0
+    costs:
+      echelon_points: 10
+    stats:
+      - addHealth(2)
+      - addMiningSpeed(5)
+      - addMovementSpeed(2)

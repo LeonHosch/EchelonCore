@@ -21,12 +21,15 @@ public final class KingData extends SavedData {
     public static final SavedDataType<KingData> TYPE = new SavedDataType<>(
             EchelonCore.id("king"), KingData::new, CODEC, null);
 
+    // Create an unappointed king record for a new world.
     public KingData() { }
 
+    // Restore the optional elected UUID decoded from EchelonCore's SavedData file.
     private KingData(Optional<UUID> electedKing) {
         this.electedKing = electedKing.orElse(null);
     }
 
+    // Load the king record and consume the legacy CWP king field once when upgrading an existing world.
     static KingData get(MinecraftServer server) {
         KingData data = server.overworld().getDataStorage().computeIfAbsent(TYPE);
         if (data.electedKing == null) {
@@ -35,8 +38,13 @@ public final class KingData extends SavedData {
         return data;
     }
 
+    // Expose the current appointment without leaking a nullable UUID.
     Optional<UUID> electedKing() { return Optional.ofNullable(electedKing); }
+
+    // Replace any previous king and mark the world record for saving.
     void setKing(UUID playerUuid) { electedKing = playerUuid; setDirty(); }
+
+    // Clear the appointment and mark the world record for saving.
     void clearKing() { electedKing = null; setDirty(); }
 }
 

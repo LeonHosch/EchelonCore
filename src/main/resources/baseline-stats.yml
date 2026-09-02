@@ -1,0 +1,6 @@
+# Echelon's permanent starting stats use the same expressions as skill-tree nodes.
+# CWP applies them separately from unlocks and uses them for stat-sheet Start values.
+baseline_stats:
+  - addHealth(-8)
+  - addMiningSpeed(-20)
+  - addMovementSpeed(-10)

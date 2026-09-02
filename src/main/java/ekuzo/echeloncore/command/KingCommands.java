@@ -17,8 +17,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 public final class KingCommands {
+    // Prevent instantiation of this command utility.
     private KingCommands() { }
 
+    // Register king inspection plus operator-only appointment and clearing branches.
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("king").executes(KingCommands::showKing)
                 .then(Commands.literal("set").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
@@ -27,6 +29,7 @@ public final class KingCommands {
                         .executes(KingCommands::clearKing)));
     }
 
+    // Display the current king, resolving an online name when possible.
     private static int showKing(CommandContext<CommandSourceStack> context) {
         Optional<UUID> king = KingService.getKing(context.getSource().getServer());
         context.getSource().sendSuccess(() -> king
@@ -36,6 +39,7 @@ public final class KingCommands {
         return king.isPresent() ? 1 : 0;
     }
 
+    // Require exactly one selected profile and persist it as the new king.
     private static int setKing(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         Collection<NameAndId> profiles = GameProfileArgument.getGameProfiles(context, "player");
         if (profiles.size() != 1) {
@@ -49,6 +53,7 @@ public final class KingCommands {
         return 1;
     }
 
+    // Remove the current appointment without changing any progression unlocks or balances.
     private static int clearKing(CommandContext<CommandSourceStack> context) {
         KingService.clearKing(context.getSource().getServer());
         context.getSource().sendSuccess(() -> Component.literal("The current king was cleared.")
@@ -56,6 +61,7 @@ public final class KingCommands {
         return 1;
     }
 
+    // Prefer an online player's current name and fall back to the persisted UUID for offline kings.
     private static String displayName(CommandSourceStack source, UUID playerUuid) {
         ServerPlayer player = source.getServer().getPlayerList().getPlayer(playerUuid);
         return player == null ? playerUuid.toString() : player.getName().getString();
