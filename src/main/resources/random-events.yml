@@ -1,0 +1,14 @@
+# EchelonCore owns event definitions; CWP reads, schedules, and persists them.
+# Times in this file default to Europe/Berlin and automatically follow daylight-saving changes.
+timezone: Europe/Berlin
+
+# Random rolls are suppressed from Friday 19:00 until Saturday 00:00 local time.
+# Events that were already active continue until their configured duration ends.
+blackout_windows:
+  - weekdays:
+      - FRIDAY
+    start: "12:00"
+    end: "00:00"
+
+# Blood Moon, Rift, and other concrete events will be added here when their gameplay is implemented.
+events: []

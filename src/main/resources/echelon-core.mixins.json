@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "ekuzo.echeloncore.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "ServerAdvancementManagerMixin"
+  ],
+  "client": [
+    "client.RenderPipelinesAccessor",
+    "client.RenderTypeAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

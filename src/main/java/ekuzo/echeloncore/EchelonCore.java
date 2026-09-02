@@ -2,11 +2,17 @@ package ekuzo.echeloncore;
 
 import ekuzo.crazyworldprogression.currency.CurrencyDefinition;
 import ekuzo.crazyworldprogression.currency.CurrencyRegistry;
+import ekuzo.crazyworldprogression.events.RandomEventRegistry;
+import ekuzo.crazyworldprogression.progression.skilltrees.BaselineStatRegistry;
 import ekuzo.crazyworldprogression.progression.skilltrees.SkillTreeRegistry;
+import ekuzo.echeloncore.advancement.EchelonAdvancementManager;
+import ekuzo.echeloncore.admin.EchelonAdminModule;
 import ekuzo.echeloncore.command.KingCommands;
+import ekuzo.echeloncore.command.VeilCommands;
 import ekuzo.echeloncore.king.KingService;
-import ekuzo.echeloncore.progression.PlayerModifications;
 import ekuzo.echeloncore.veil.VeilManager;
+import ekuzo.echeloncore.veil.anomaly.VeilAnomalyNetworking;
+import ekuzo.echeloncore.veil.anomaly.VeilAnomalyService;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -28,21 +34,31 @@ public final class EchelonCore implements ModInitializer {
     public static final Identifier FAKHRUL_CURRENCY = id("fakhrul_currency");
     public static final Identifier POWERFUL_SOULS = id("powerful_souls");
 
+    // Register all concrete Echelon content and policies with CWP, then start Echelon-owned gameplay systems.
     @Override
     public void onInitialize() {
         registerCurrencies();
+        EchelonAdminModule.register();
+        RandomEventRegistry.registerSource(MOD_ID, MOD_ID, "random-events.yml");
+        BaselineStatRegistry.registerSource(id("default-baseline"), MOD_ID, "baseline-stats.yml");
         SkillTreeRegistry.registerSource(MOD_ID, MOD_ID, "skilltrees");
         SkillTreeRegistry.registerPurchasePolicy(id("kingdom-progression"), (player, tree) ->
                 KingService.isKing(player.level().getServer(), player.getUUID())
                         ? SkillTreeRegistry.PurchaseDecision.ALLOWED
                         : SkillTreeRegistry.PurchaseDecision.denied("Only the elected king can unlock this tree."));
         VeilManager.initialize();
-        PlayerModifications.initialize();
+        VeilAnomalyNetworking.registerPayloadType();
+        VeilAnomalyService.initialize();
+        EchelonAdvancementManager.initialize();
         ServerLifecycleEvents.SERVER_STARTED.register(server -> KingService.getKing(server));
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingCommands.register(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            KingCommands.register(dispatcher);
+            VeilCommands.register(dispatcher);
+        });
         LOGGER.info("Initialized Echelon gameplay systems");
     }
 
+    // Define the four Echelon currencies whose storage, commands, and GUI rendering are supplied by CWP.
     private static void registerCurrencies() {
         register(KINGDOM_POINTS, "Kingdom Points", "KP", GLOBAL, "kp-32x32.png", 7, 4, 18, 24,
                 ChatFormatting.GOLD, "kp", "kingdompoints");
@@ -54,6 +70,7 @@ public final class EchelonCore implements ModInitializer {
                 ChatFormatting.DARK_PURPLE, "ps", "powerfulsouls");
     }
 
+    // Adapt compact Echelon metadata into one complete framework currency definition.
     private static void register(Identifier id, String name, String abbreviation,
                                  CurrencyDefinition.CurrencyScope scope, String icon, int u, int v,
                                  int width, int height, ChatFormatting color, String... commands) {
@@ -61,6 +78,7 @@ public final class EchelonCore implements ModInitializer {
                 id("currencies/" + icon), u, v, width, height, color, List.of(commands)));
     }
 
+    // Create a stable resource or registry identifier inside EchelonCore's namespace.
     public static Identifier id(String path) {
         return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
