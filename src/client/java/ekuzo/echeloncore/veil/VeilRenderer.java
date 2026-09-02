@@ -24,6 +24,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Util;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
+import ekuzo.echeloncore.veil.anomaly.ClientVeilAnomalies;
 
 public final class VeilRenderer {
     private static final int SEGMENTS = 512;
@@ -83,6 +84,8 @@ public final class VeilRenderer {
         double x = camera.pos.x - veil.centerX();
         double z = camera.pos.z - veil.centerZ();
         double distanceSquared = x * x + z * z;
+        boolean anomalyVeil = ClientVeilAnomalies.visionAt(level.dimension().identifier(), camera.pos)
+            == ClientVeilAnomalies.AnomalyVision.VEIL;
         VeilZone newZone;
 
         if (distanceSquared > OUTER_VEIL_RADIUS * OUTER_VEIL_RADIUS) {
@@ -92,7 +95,7 @@ public final class VeilRenderer {
             sky.sunriseAndSunsetColor = darkenAndTint(sky.sunriseAndSunsetColor, 0.015F, 0.002F, 0.040F);
             levelState.cloudColor = darkenAndTint(levelState.cloudColor, 0.018F, 0.003F, 0.045F);
             sky.starBrightness *= 0.08F;
-        } else if (distanceSquared > INNER_VEIL_RADIUS * INNER_VEIL_RADIUS) {
+        } else if (distanceSquared > INNER_VEIL_RADIUS * INNER_VEIL_RADIUS || anomalyVeil) {
             newZone = VeilZone.INNER;
             ambienceColor = INNER_AMBIENCE;
             sky.skyColor = darkenAndTint(sky.skyColor, 0.075F, 0.018F, 0.130F);
