@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 /** Replaces the game's advancement catalog with only EchelonCore-owned definitions on every data reload. */
@@ -25,7 +26,8 @@ public abstract class ServerAdvancementManagerMixin {
             Map<Identifier, Advancement> loadedAdvancements) {
         Map<Identifier, Advancement> retained = loadedAdvancements.entrySet().stream()
                 .filter(entry -> EchelonCore.MOD_ID.equals(entry.getKey().getNamespace()))
-                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (left, right) -> right, HashMap::new));
         EchelonCore.LOGGER.info("Retained {} Echelon advancement definition(s) and removed {} other definition(s)",
                 retained.size(), loadedAdvancements.size() - retained.size());
         return retained;
