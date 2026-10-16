@@ -1,0 +1,161 @@
+# Demonstrates personal unlocks, prerequisites, multi-currency costs, stat effects,
+# and a permanent choice between three paths. following: 1 on the root blocks
+# every unchosen child and its descendants once a path is selected.
+skilltree: personal
+priority: 2
+name: Paths of the Adventurer
+gname: Pfade des Abenteurers
+icon: minecraft:compass
+
+skills:
+  - id: choose_your_path
+    name: Choose Your Path
+    gname: Wähle deinen Pfad
+    description: Begin your journey. The next choice permanently locks the other paths.
+    beschreibung: Beginne deine Reise. Die nächste Wahl sperrt die anderen Pfade dauerhaft.
+    icon: minecraft:compass
+    previous: none
+    following: 1
+    costs:
+      echelon_points: 0
+    stats: []
+
+  - id: warrior
+    name: Warrior
+    gname: Krieger
+    description: Choose the warrior path and gain one heart.
+    beschreibung: Wähle den Kriegerpfad und erhalte ein Herz.
+    icon: minecraft:iron_sword
+    previous: choose_your_path
+    following: 0
+    costs:
+      echelon_points: 10
+    stats:
+      - addHealth(2)
+
+  - id: heavy_training
+    name: Heavy Training
+    gname: Schweres Training
+    description: Gain another half heart and 5% attack speed.
+    beschreibung: Erhalte ein weiteres halbes Herz und 5% Angriffsgeschwindigkeit.
+    icon: minecraft:iron_chestplate
+    previous: warrior
+    following: 0
+    costs:
+      echelon_points: 20
+    stats:
+      - addHealth(1)
+      - addAttackSpeed(5)
+
+  - id: scout
+    name: Scout
+    gname: Kundschafter
+    description: Choose the scout path and gain 3% movement speed.
+    beschreibung: Wähle den Kundschafterpfad und erhalte 3% Bewegungsgeschwindigkeit.
+    icon: minecraft:leather_boots
+    previous: choose_your_path
+    following: 0
+    costs:
+      echelon_points: 10
+    stats:
+      - addMovementSpeed(3)
+
+  - id: swift_steps
+    name: Swift Steps
+    gname: Flinke Schritte
+    description: Gain another 4% movement speed.
+    beschreibung: Erhalte weitere 4% Bewegungsgeschwindigkeit.
+    icon: minecraft:feather
+    previous: scout
+    following: 0
+    costs:
+      echelon_points: 20
+    stats:
+      - addMovementSpeed(4)
+
+  - id: miner
+    name: Miner
+    gname: Bergmann
+    description: Choose the miner path and gain 5% mining speed.
+    beschreibung: Wähle den Bergmannpfad und erhalte 5% Abbaugeschwindigkeit.
+    icon: minecraft:iron_pickaxe
+    previous: choose_your_path
+    following: 0
+    costs:
+      echelon_points: 10
+    stats:
+      - addMiningSpeed(5)
+
+  - id: deep_delving
+    name: Deep Delving
+    gname: Tiefenschürfer
+    description: Gain another 10% mining speed.
+    beschreibung: Erhalte weitere 10% Abbaugeschwindigkeit.
+    icon: minecraft:diamond_pickaxe
+    previous: miner
+    following: 0
+    costs:
+      echelon_points: 20
+    stats:
+      - addMiningSpeed(10)
+
+  - id: preparation
+    name: Preparation
+    gname: Vorbereitung
+    description: An independent upgrade available alongside any chosen path.
+    beschreibung: Eine unabhängige Verbesserung für jeden gewählten Pfad.
+    icon: minecraft:bread
+    previous: none
+    following: 0
+    costs:
+      echelon_points: 5
+    stats:
+      - addHealth(1)
+
+  - id: veteran_warrior
+    name: Veteran Warrior
+    gname: Veteranenkrieger
+    description: Requires both warrior training and preparation. Gain 5% attack speed.
+    beschreibung: Benötigt Kriegertraining und Vorbereitung. Erhalte 5% Angriffsgeschwindigkeit.
+    icon: minecraft:diamond_sword
+    previous:
+      - heavy_training
+      - preparation
+    following: 0
+    costs:
+      echelon_points: 30
+      fakhrul_currency: 1
+    stats:
+      - addAttackSpeed(5)
+
+  - id: veteran_scout
+    name: Veteran Scout
+    gname: Veteranenkundschafter
+    description: Requires swift steps and preparation. Gain 2% movement speed.
+    beschreibung: Benötigt flinke Schritte und Vorbereitung. Erhalte 2% Bewegungsgeschwindigkeit.
+    icon: minecraft:golden_boots
+    previous:
+      - swift_steps
+      - preparation
+    following: 0
+    costs:
+      echelon_points: 30
+      fakhrul_currency: 1
+    stats:
+      - addMovementSpeed(2)
+
+  - id: veteran_miner
+    name: Veteran Miner
+    gname: Veteranenbergarbeiter
+    description: Requires deep delving and preparation. Gain 5% mining speed.
+    beschreibung: Benötigt Tiefenschürfen und Vorbereitung. Erhalte 5% Abbaugeschwindigkeit.
+    icon: minecraft:netherite_pickaxe
+    previous:
+      - deep_delving
+      - preparation
+    following: 0
+    costs:
+      echelon_points: 30
+      fakhrul_currency: 1
+    stats:
+      - addMiningSpeed(5)

@@ -19,7 +19,7 @@ EchelonCore and CWP must both be installed on the client and server. CWP owns th
 ```mermaid
 flowchart LR
     E[EchelonCore] -->|4 currency definitions| C[CWP currency framework]
-    E -->|2 YAML resources| T[CWP YAML loader and tree runtime]
+    E -->|3 YAML resources| T[CWP YAML loader and tree runtime]
     E -->|king-only policy| T
     E --> K[King persistence and commands]
     E --> V[Veil damage and renderer]
@@ -55,6 +55,7 @@ The bundled definitions live in [`src/main/resources/skilltrees`](src/main/resou
 | --- | --- | --- | --- |
 | [`kingdom-progression.yml`](src/main/resources/skilltrees/kingdom-progression.yml) | Global | 8 branching kingdom upgrades paid with KP and FC | Only the appointed king may purchase nodes |
 | [`a-new-beginning.yml`](src/main/resources/skilltrees/a-new-beginning.yml) | Personal | 9 personal upgrades paid with EP | Each player owns their unlocks |
+| [`player-paths.yml`](src/main/resources/skilltrees/player-paths.yml) | Personal | 11 example upgrades across warrior, scout, and miner paths | Choosing one path permanently excludes the other two and their descendants |
 
 Tree effects combine combat, movement, gathering, reward, interaction-range, and Echelon-specific Veil Level progression. Every node declares a mandatory stable `id`, and every `previous` value references one of those IDs rather than a display name. CWP validates all costs, prerequisites, branch limits, identifiers, cycles, and stat expressions before making the trees available.
 
