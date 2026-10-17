@@ -41,6 +41,7 @@ public final class EchelonAdvancementRewardService {
             entry(id("mysteries/nether"), RewardTier.EASY),
             entry(id("mysteries/end"), RewardTier.HARD),
             entry(id("mysteries/crowned"), RewardTier.HARD),
+            entry(id("mysteries/raidmaster"), RewardTier.HARD),
             entry(id("monster_hunting/root"), RewardTier.REALLY_EASY),
             entry(id("monster_hunting/kills_25"), RewardTier.EASY),
             entry(id("monster_hunting/kills_100"), RewardTier.MEDIUM),
