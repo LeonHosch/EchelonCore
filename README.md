@@ -2,6 +2,8 @@
 
 EchelonCore contains the concrete gameplay systems for the Echelon server. It registers Echelon's currencies, skill trees, baseline stat profile, and random-event configuration with [Crazy World Progression](https://github.com/LeonHosch/CrazyWorldProgression) (CWP), then adds the king, Powerful Soul, and veil rules that are specific to Echelon.
 
+See [performance design and profiling](docs/performance.md) for Echelon-specific tick work, remaining risks, and release measurements.
+
 ## Requirements
 
 | Component | Version |
