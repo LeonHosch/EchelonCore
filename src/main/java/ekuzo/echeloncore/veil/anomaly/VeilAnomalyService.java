@@ -1,5 +1,9 @@
 package ekuzo.echeloncore.veil.anomaly;
 
+import ekuzo.crazyworldprogression.portals.PocketEditorService;
+import ekuzo.crazyworldprogression.portals.PortalRegistry;
+import ekuzo.crazyworldprogression.portals.PortalService;
+import ekuzo.crazyworldprogression.portals.PortalTemplateService;
 import ekuzo.echeloncore.EchelonCore;
 import ekuzo.echeloncore.veil.VeilManager;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -54,6 +58,12 @@ public final class VeilAnomalyService {
 
     // Register lifecycle synchronization and once-per-second Veil Level transition detection.
     public static void initialize() {
+        PortalRegistry.registerListener(new PortalRegistry.InstanceListener() {
+            @Override
+            public void onCreated(MinecraftServer server, PortalService.ActiveInstance instance) {
+                rebuild(server, true);
+            }
+        });
         ServerLifecycleEvents.SERVER_STARTED.register(server -> rebuild(server, true));
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
             synchronized (RUNTIMES) {
@@ -99,7 +109,6 @@ public final class VeilAnomalyService {
     // Create a new anomaly, rejecting an identifier already present in world data.
     public static void create(MinecraftServer server, VeilAnomaly anomaly) {
         if (get(server, anomaly.id()) != null) throw new IllegalArgumentException("Anomaly already exists: " + anomaly.id());
-        validateBoundaryLayout(server, anomaly);
         VeilAnomalyData.get(server).put(anomaly);
         rebuild(server, true);
     }
@@ -108,9 +117,6 @@ public final class VeilAnomalyService {
     public static void update(MinecraftServer server, VeilAnomaly anomaly) {
         VeilAnomaly existing = get(server, anomaly.id());
         if (existing == null) throw new IllegalArgumentException("Unknown anomaly: " + anomaly.id());
-        if (!existing.dimension().equals(anomaly.dimension()) || existing.boundaryMode() != anomaly.boundaryMode()) {
-            validateBoundaryLayout(server, anomaly);
-        }
         VeilAnomalyData.get(server).put(anomaly);
         rebuild(server, true);
     }
@@ -138,22 +144,6 @@ public final class VeilAnomalyService {
         RuntimeState runtime = runtime(server);
         Identifier dimension = player.level().dimension().identifier();
         return VeilAnomalyCollision.protectsBlock(dimension, position, runtime.interactionIndex());
-    }
-
-    // Prevent ambiguous opposing one-way boundaries from being configured in the same dimension.
-    private static void validateBoundaryLayout(MinecraftServer server, VeilAnomaly candidate) {
-        for (VeilAnomaly existing : anomalies(server)) {
-            if (existing.id().equals(candidate.id()) || !existing.dimension().equals(candidate.dimension())) continue;
-            if (candidate.boundaryMode() == KEEP_IN) {
-                String reason = existing.boundaryMode() == KEEP_IN
-                        ? "only one keep_in anomaly is allowed" : "a keep_out anomaly already exists";
-                throw new IllegalArgumentException("Cannot use keep_in in " + candidate.dimension() + ": " + reason);
-            }
-            if (existing.boundaryMode() == KEEP_IN) {
-                throw new IllegalArgumentException("Cannot add a keep_out anomaly to " + candidate.dimension()
-                        + " while keep_in anomaly " + existing.id() + " exists");
-            }
-        }
     }
 
     // Enforce both one-way boundary modes and retain the latest valid position on the permitted side.
@@ -219,7 +209,12 @@ public final class VeilAnomalyService {
             VeilAnomaly anomaly = runtime.keepInById().get(entry.getKey());
             if (anomaly == null) continue;
             player.stopRiding();
-            returnInside(player, runtime.keepOutIndex(), anomaly, entry.getValue());
+            if (!returnInside(player, runtime.keepOutIndex(), anomaly, entry.getValue())) {
+                memberships.remove(entry.getKey());
+                EchelonCore.LOGGER.warn("Released {} from Veil anomaly {}: no safe inside position remains",
+                        player.getGameProfile().name(), anomaly.id());
+                continue;
+            }
             memberships.put(anomaly.id(), new SafePosition(anomaly.dimension(), player.position()));
             EchelonCore.LOGGER.info("Veil anomaly {} contained {} with a chorus teleport",
                     anomaly.id(), player.getGameProfile().name());
@@ -228,8 +223,8 @@ public final class VeilAnomalyService {
     }
 
     // Find a safe chorus landing inside the containing anomaly, falling back to its last known inside position.
-    private static void returnInside(ServerPlayer player, VeilAnomalySpatialIndex keepOutIndex,
-                                     VeilAnomaly anomaly, SafePosition remembered) {
+    private static boolean returnInside(ServerPlayer player, VeilAnomalySpatialIndex keepOutIndex,
+                                        VeilAnomaly anomaly, SafePosition remembered) {
         Vec3 origin = player.position();
         for (int attempt = 0; attempt < RANDOM_TELEPORT_ATTEMPTS; attempt++) {
             double angle = player.getRandom().nextDouble() * Math.PI * 2.0;
@@ -237,10 +232,10 @@ public final class VeilAnomalyService {
             Vec3 requested = new Vec3(origin.x + Math.cos(angle) * distance,
                     origin.y + (player.getRandom().nextDouble() * 2.0 - 1.0) * REJECTION_VERTICAL_RANGE,
                     origin.z + Math.sin(angle) * distance);
-            if (tryContainedChorusTeleport(player, keepOutIndex, anomaly, requested, origin)) return;
+            if (tryContainedChorusTeleport(player, keepOutIndex, anomaly, requested, origin)) return true;
         }
-        if (tryContainedChorusTeleport(player, keepOutIndex, anomaly, remembered.feet(), origin)) return;
-        forceInside(player, keepOutIndex, anomaly, remembered);
+        if (tryContainedChorusTeleport(player, keepOutIndex, anomaly, remembered.feet(), origin)) return true;
+        return forceInside(player, keepOutIndex, anomaly, remembered);
     }
 
     // Validate that vanilla's final landing remains inside the selected anomaly and outside every keep-out anomaly.
@@ -262,15 +257,16 @@ public final class VeilAnomalyService {
     }
 
     // Guarantee same-dimension containment at the last server-observed inside position.
-    private static void forceInside(ServerPlayer player, VeilAnomalySpatialIndex keepOutIndex,
-                                    VeilAnomaly anomaly, SafePosition remembered) {
+    private static boolean forceInside(ServerPlayer player, VeilAnomalySpatialIndex keepOutIndex,
+                                       VeilAnomaly anomaly, SafePosition remembered) {
         Vec3 bodyCenter = remembered.feet().add(0.0, PLAYER_HALF_HEIGHT, 0.0);
         if (!fullyContainsPlayer(anomaly, bodyCenter)
                 || containing(keepOutIndex, anomaly.dimension(), bodyCenter) != null) {
-            throw new IllegalStateException("No valid remembered inside point for Veil anomaly " + anomaly.id());
+            return false;
         }
         player.teleportTo(remembered.feet().x, remembered.feet().y, remembered.feet().z);
         finishChorusEffect(player, player.position());
+        return true;
     }
 
     // Try chorus-like destinations within a six-block horizontal radius and four vertical blocks of entry.
@@ -450,12 +446,24 @@ public final class VeilAnomalyService {
     // Rebuild resolved runtime collections only when definitions changed or the Veil Level crossed a threshold.
     private static void rebuild(MinecraftServer server, boolean force) {
         int veilLevel = VeilManager.getVeilLevel(server);
+        List<ProjectionSpec> projections = projectionSpecs(server);
         RuntimeState previous;
         synchronized (RUNTIMES) {
             previous = RUNTIMES.get(server);
         }
-        if (!force && previous != null && previous.veilLevel() == veilLevel) return;
-        List<VeilAnomaly> anomalies = normalizeBoundaryLayouts(anomalies(server));
+        if (!force && previous != null && previous.veilLevel() == veilLevel
+                && previous.projections().equals(projections)) return;
+        List<VeilAnomaly> saved = anomalies(server);
+        List<VeilAnomaly> resolved = new ArrayList<>(saved);
+        for (ProjectionSpec projection : projections) {
+            for (VeilAnomaly anomaly : saved) {
+                if (anomaly.dimension().equals(projection.editorDimension())) {
+                    resolved.add(VeilAnomalyProjection.intoInstance(anomaly, projection.instance(),
+                            projection.captureOrigin()));
+                }
+            }
+        }
+        List<VeilAnomaly> anomalies = List.copyOf(resolved);
         VeilAnomalySpatialIndex solidIndex = new VeilAnomalySpatialIndex();
         VeilAnomalySpatialIndex interactionIndex = new VeilAnomalySpatialIndex();
         VeilAnomalySpatialIndex keepOutIndex = new VeilAnomalySpatialIndex();
@@ -473,7 +481,8 @@ public final class VeilAnomalyService {
                 keepInById.put(anomaly.id(), anomaly);
             }
         }
-        RuntimeState current = new RuntimeState(veilLevel, anomalies, solidIndex, interactionIndex, keepOutIndex,
+        RuntimeState current = new RuntimeState(veilLevel, projections, anomalies,
+                solidIndex, interactionIndex, keepOutIndex,
                 keepInIndex, keepInById);
         synchronized (RUNTIMES) {
             RUNTIMES.put(server, current);
@@ -486,27 +495,24 @@ public final class VeilAnomalyService {
                 anomalies.size(), veilLevel);
     }
 
-    // Safely treat legacy conflicting keep-in layouts as keep-out until an administrator fixes their definitions.
-    private static List<VeilAnomaly> normalizeBoundaryLayouts(List<VeilAnomaly> definitions) {
-        Map<Identifier, Integer> keepInCounts = new HashMap<>();
-        Set<Identifier> keepOutDimensions = new HashSet<>();
-        for (VeilAnomaly anomaly : definitions) {
-            if (anomaly.boundaryMode() == KEEP_IN) {
-                keepInCounts.merge(anomaly.dimension(), 1, Integer::sum);
-            } else {
-                keepOutDimensions.add(anomaly.dimension());
+    // Track the instance lease and editor capture origin so recaptures and expiry refresh projections.
+    private static List<ProjectionSpec> projectionSpecs(MinecraftServer server) {
+        List<ProjectionSpec> specs = new ArrayList<>();
+        for (PortalService.ActiveInstance instance : PortalService.activeInstances(server)) {
+            Identifier pocketId = instance.templateId();
+            Identifier editor = PocketEditorService.dimension(server, pocketId);
+            if (editor == null) continue;
+            BlockPos origin = PocketEditorService.captureOrigin(server, pocketId);
+            if (origin == null) {
+                PortalTemplateService.TemplateInfo template = PortalTemplateService.template(server, pocketId);
+                BlockPos entry = PocketEditorService.entry(server, pocketId);
+                if (template != null && entry != null) {
+                    origin = entry.offset(-template.spawnX(), -template.spawnY(), -template.spawnZ());
+                }
             }
+            if (origin != null) specs.add(new ProjectionSpec(instance, editor, origin));
         }
-        Set<Identifier> invalidDimensions = new HashSet<>();
-        keepInCounts.forEach((dimension, count) -> {
-            if (count > 1 || keepOutDimensions.contains(dimension)) invalidDimensions.add(dimension);
-        });
-        if (invalidDimensions.isEmpty()) return definitions;
-        EchelonCore.LOGGER.error("Invalid Veil anomaly boundary layout in {}; treating its keep-in anomalies as "
-                + "keep-out until the conflict is fixed", invalidDimensions);
-        return definitions.stream().map(anomaly -> anomaly.boundaryMode() == KEEP_IN
-                        && invalidDimensions.contains(anomaly.dimension())
-                ? anomaly.withBoundaryMode(KEEP_OUT) : anomaly).toList();
+        return List.copyOf(specs);
     }
 
     // Send the current resolved level and complete definitions to one newly connected client.
@@ -527,12 +533,17 @@ public final class VeilAnomalyService {
         }
     }
 
-    private record RuntimeState(int veilLevel, List<VeilAnomaly> anomalies,
+    private record ProjectionSpec(PortalService.ActiveInstance instance, Identifier editorDimension,
+                                  BlockPos captureOrigin) {
+    }
+
+    private record RuntimeState(int veilLevel, List<ProjectionSpec> projections, List<VeilAnomaly> anomalies,
                                 VeilAnomalySpatialIndex solidIndex, VeilAnomalySpatialIndex interactionIndex,
                                 VeilAnomalySpatialIndex keepOutIndex, VeilAnomalySpatialIndex keepInIndex,
                                 Map<Identifier, VeilAnomaly> keepInById) {
         // Freeze definition snapshots independently from persistent mutable storage.
         private RuntimeState {
+            projections = List.copyOf(projections);
             anomalies = List.copyOf(anomalies);
             keepInById = Map.copyOf(keepInById);
         }

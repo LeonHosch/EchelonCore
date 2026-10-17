@@ -11,6 +11,7 @@ import ekuzo.echeloncore.command.KingCommands;
 import ekuzo.echeloncore.command.VeilCommands;
 import ekuzo.echeloncore.king.KingService;
 import ekuzo.echeloncore.veil.VeilManager;
+import ekuzo.echeloncore.veil.VeilRadiusNetworking;
 import ekuzo.echeloncore.veil.anomaly.VeilAnomalyNetworking;
 import ekuzo.echeloncore.veil.anomaly.VeilAnomalyService;
 import net.fabricmc.api.ModInitializer;
@@ -47,6 +48,7 @@ public final class EchelonCore implements ModInitializer {
                         ? SkillTreeRegistry.PurchaseDecision.ALLOWED
                         : SkillTreeRegistry.PurchaseDecision.denied("Only the elected king can unlock this tree."));
         VeilManager.initialize();
+        VeilRadiusNetworking.register();
         VeilAnomalyNetworking.registerPayloadType();
         VeilAnomalyService.initialize();
         EchelonAdvancementManager.initialize();

@@ -97,9 +97,11 @@ public final class EchelonAdvancementManager {
     private static void evaluateMysteries(ServerPlayer player) {
         MinecraftServer server = player.level().getServer();
         double veilDistance = VeilManager.distanceFromSpawn(server, player);
-        if (veilDistance > VeilManager.WORLD_RADIUS_ONE) grant(player, MYSTERIES_ROOT);
+        VeilManager.Radii radii = VeilManager.getRadii(server, player.level().dimension().identifier(),
+                VeilManager.getVeilLevel(server));
+        if (radii != null && veilDistance > radii.inner()) grant(player, MYSTERIES_ROOT);
         if (!isComplete(player, MYSTERIES_ROOT)) return;
-        if (veilDistance > VeilManager.WORLD_RADIUS_TWO) grant(player, id("mysteries/outer_veil"));
+        if (radii != null && veilDistance > radii.outer()) grant(player, id("mysteries/outer_veil"));
         if (CurrencyService.getBalance(server, player.getUUID(), EchelonCore.POWERFUL_SOULS) >= 1L) {
             grant(player, id("mysteries/powerful_soul"));
         }

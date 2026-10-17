@@ -100,15 +100,15 @@ ClaimLedgerService.ClaimResult result = PowerfulSoulService.claim(
 
 Veil Level is a global numeric progression value registered by EchelonCore with CWP. It starts at `0`, and `addVeilLevel` accepts only `addVeilLevel(1)`, ensuring every relevant node increments it by exactly one. The current kingdom tree can reach Veil Level 4. Other Echelon systems can read it with `VeilManager.getVeilLevel(server)`.
 
-Veil Level does not change the original world-edge veil range or damage. Those mechanics retain the following hardcoded behavior:
+World-edge Veil radii are now saved per dimension and exact Veil Level. Use the **Veil** page in `/cwp admin` to add or remove an inner and outer radius pair. A dimension without a pair at the current level has no world-edge Veil at all; this includes the workshop and pocket dimensions unless an administrator explicitly configures them. The overworld is centered on its spawn; other dimensions use their own `(0, 0)` origin. Distance is horizontal.
 
-The veil is centered on the overworld spawn and uses horizontal distance.
+For a configured pair, the server effects are:
 
-| Distance from spawn | Server effect |
+| Distance from that dimension's center | Server effect |
 | --- | --- |
-| 0-1000 blocks | Safe zone |
-| More than 1000 and up to 1200 blocks | 2 magic damage every 5 seconds |
-| More than 1200 blocks | 5 magic damage every second |
+| Up to the inner radius | Safe zone |
+| Beyond inner, up to outer radius | 2 magic damage every 5 seconds |
+| Beyond outer radius | 5 magic damage every second |
 
 The client renderer visualizes the two cylindrical boundaries and adds the associated fog, sky, HUD, and sound effects.
 
@@ -155,9 +155,9 @@ Echelon's starting adjustments live in [`baseline-stats.yml`](src/main/resources
 
 | Attribute | Modifier |
 | --- | --- |
-| Block-breaking speed | +100% |
-| Movement speed | +40% |
-| Maximum health | -4 health points (2 hearts) |
+| Block-breaking speed | -20% |
+| Movement speed | -10% |
+| Maximum health | -8 health points (4 hearts) |
 
 These are Echelon defaults, separate from bonuses granted by unlocked CWP skill nodes. Negative percentage expressions work normally; for example, `addMovementSpeed(-20)` reduces starting movement speed by 20%.
 
@@ -169,15 +169,15 @@ The initial configuration contains no event definitions yet. It does contain the
 
 | Time zone | Protected slot | Effect |
 | --- | --- | --- |
-| Europe/Berlin | Every Friday from 19:00 until Saturday 00:00 | CWP performs no automatic event starts |
+| Europe/Berlin | Every Friday from 12:00 until Saturday 00:00 | CWP performs no automatic event starts |
 
-Events already active at 19:00 continue until their configured duration ends. Change the blackout's `end` value if the protected RP slot should extend beyond midnight.
+Events already active at 12:00 continue until their configured duration ends. Change the blackout's `end` value if the protected RP slot should extend beyond midnight.
 
 Future Blood Moon or Rift definitions belong in this Echelon-owned YAML file. Their implementation classes can register CWP lifecycle handlers and query `RandomEventService` without moving Echelon-specific behavior into the framework.
 
 ### Portal instances
 
-Portal template authoring and temporary-dimension lifecycle now live directly in CWP rather than EchelonCore. Game masters can enter the workshop from `/cwp admin`, select a draft with left- and right-click, set an explicit in-selection pocket spawn, and save or clear that selected draft. A separate Portals page places and edits two-dimensional portals without coordinate commands; shape and plane use constrained dropdowns, while the page also controls linked templates, dimensions, real-time lifetimes, and calendar or repeating timer gates. CWP reconstructs templates in reusable empty dimensions, evacuates players when time expires, and clears each slot before reuse.
+Portal template authoring and temporary-dimension lifecycle live directly in CWP. Game masters can enter the workshop from `/cwp admin`, create or recapture pocket templates, select areas by click or exact coordinates, and set an in-selection spawn. The Pockets page lists templates for editing and deletion. A separate Portals page places and edits two-dimensional portals with constrained dropdowns and schedule controls. CWP reconstructs templates in reusable empty dimensions, evacuates players when time expires, and clears each slot before reuse.
 
 EchelonCore currently ships no captured portal template or placed portal. Future Echelon rifts, dungeons, and story dimensions can use CWP's commands and `PortalRegistry` lifecycle listener without introducing a second template format here. See CWP's README and `/cwp portals` for the complete authoring workflow.
 
@@ -311,7 +311,7 @@ Tree resources are loaded when the server starts and can also be reloaded from `
 
 ## Administration panel
 
-Run `/cwp admin` as a game master. CWP renders the shared dashboard and its native framework module; EchelonCore registers a second `EchelonCore` button through CWP's public `AdminPanelRegistry` API. Its pages cover the current king, appointing online rulers, Veil Level diagnostics, anomaly state and removal, advancement policy, and online Echelon Point totals. The CWP Currency page lists EchelonCore's four currency definitions and applies Give/Take/Set operations through a shared player-autocomplete and amount form rather than rendering every player's wallet. Destructive actions such as clearing the crown, removing an anomaly, setting a wallet, or clearing a workshop draft require confirmation where appropriate.
+Run `/cwp admin` as a game master or press Ctrl+Shift+A in game. CWP reopens the last module/page used during this server session. EchelonCore registers a second `EchelonCore` button through CWP's public `AdminPanelRegistry` API. Its pages cover the current king, Veil Level and per-world radii, anomalies, advancements, and online Echelon Point totals. Destructive actions such as clearing the crown, removing a radius pair or anomaly, and deleting a pocket require confirmation.
 
 ## Persistence and migration
 

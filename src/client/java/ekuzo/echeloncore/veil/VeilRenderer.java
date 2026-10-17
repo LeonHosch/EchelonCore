@@ -36,8 +36,6 @@ public final class VeilRenderer {
     private static final long TRANSITION_ATTACK_MILLIS = 90L;
     private static final long TRANSITION_DURATION_MILLIS = 650L;
     private static final float VEIL_FOG_END = 100.0F;
-    private static final double INNER_VEIL_RADIUS = VeilManager.WORLD_RADIUS_ONE - 0.5;
-    private static final double OUTER_VEIL_RADIUS = VeilManager.WORLD_RADIUS_TWO - 0.5;
     private static final int INNER_COLOR = rgba(24, 5, 36, 150);
     private static final int OUTER_COLOR = rgba(5, 0, 12, 210);
     private static final int INNER_AMBIENCE = rgba(62, 8, 88, 92);
@@ -61,12 +59,16 @@ public final class VeilRenderer {
     // Register veil state extraction, world geometry, and HUD ambience callbacks.
     public static void register() {
         LevelExtractionEvents.END_EXTRACTION.register(context -> {
-            BlockPos spawn = context.level().getRespawnData().pos();
+            BlockPos spawn = context.level().dimension() == net.minecraft.world.level.Level.OVERWORLD
+                    ? context.level().getRespawnData().pos() : BlockPos.ZERO;
+            VeilManager.Radii configured = ClientVeilRadii.get(context.level().dimension().identifier());
             VeilRenderState veil = new VeilRenderState(
                 spawn.getX() + 0.5,
                 spawn.getZ() + 0.5,
                 context.level().getMinY(),
-                context.level().getMaxY()
+                context.level().getMaxY(),
+                configured == null ? Double.NaN : configured.inner() - 0.5,
+                configured == null ? Double.NaN : configured.outer() - 0.5
             );
 
             context.levelState().setData(VEIL_STATE, veil);
@@ -88,14 +90,16 @@ public final class VeilRenderer {
             == ClientVeilAnomalies.AnomalyVision.VEIL;
         VeilZone newZone;
 
-        if (distanceSquared > OUTER_VEIL_RADIUS * OUTER_VEIL_RADIUS) {
+        if (!Double.isNaN(veil.outerRadius())
+                && distanceSquared > veil.outerRadius() * veil.outerRadius()) {
             newZone = VeilZone.OUTER;
             ambienceColor = OUTER_AMBIENCE;
             sky.skyColor = darkenAndTint(sky.skyColor, 0.012F, 0.002F, 0.035F);
             sky.sunriseAndSunsetColor = darkenAndTint(sky.sunriseAndSunsetColor, 0.015F, 0.002F, 0.040F);
             levelState.cloudColor = darkenAndTint(levelState.cloudColor, 0.018F, 0.003F, 0.045F);
             sky.starBrightness *= 0.08F;
-        } else if (distanceSquared > INNER_VEIL_RADIUS * INNER_VEIL_RADIUS || anomalyVeil) {
+        } else if ((!Double.isNaN(veil.innerRadius())
+                && distanceSquared > veil.innerRadius() * veil.innerRadius()) || anomalyVeil) {
             newZone = VeilZone.INNER;
             ambienceColor = INNER_AMBIENCE;
             sky.skyColor = darkenAndTint(sky.skyColor, 0.075F, 0.018F, 0.130F);
@@ -236,28 +240,12 @@ public final class VeilRenderer {
         poseStack.pushPose();
         poseStack.translate(veil.centerX() - camera.x, -camera.y, veil.centerZ() - camera.z);
 
-        submitVeilLayer(
-            context,
-            poseStack,
-            INNER_VEIL_RADIUS,
-            veil,
-            cameraX,
-            cameraZ,
-            camera.y,
-            context.levelState().gameTime,
-            INNER_COLOR
-        );
-        submitVeilLayer(
-            context,
-            poseStack,
-            OUTER_VEIL_RADIUS,
-            veil,
-            cameraX,
-            cameraZ,
-            camera.y,
-            context.levelState().gameTime,
-            OUTER_COLOR
-        );
+        if (!Double.isNaN(veil.innerRadius())) submitVeilLayer(
+            context, poseStack, veil.innerRadius(), veil, cameraX, cameraZ, camera.y,
+            context.levelState().gameTime, INNER_COLOR);
+        if (!Double.isNaN(veil.outerRadius())) submitVeilLayer(
+            context, poseStack, veil.outerRadius(), veil, cameraX, cameraZ, camera.y,
+            context.levelState().gameTime, OUTER_COLOR);
 
         poseStack.popPose();
     }
@@ -434,7 +422,8 @@ public final class VeilRenderer {
         return rgba(red, green, blue, alpha);
     }
 
-    private record VeilRenderState(double centerX, double centerZ, float minY, float maxY) {
+    private record VeilRenderState(double centerX, double centerZ, float minY, float maxY,
+                                   double innerRadius, double outerRadius) {
     }
 
     private enum VeilZone {
