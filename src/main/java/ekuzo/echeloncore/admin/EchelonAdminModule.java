@@ -156,7 +156,7 @@ public final class EchelonAdminModule {
                             + " · " + anomaly.dimension(), state.collision() == VeilAnomaly.Collision.SOLID
                     ? DANGER : NORMAL, List.of(),
                     List.of(AdminPanelRegistry.AdminAction.navigate("Edit", ANOMALY_EDIT + anomaly.id()),
-                            new AdminPanelRegistry.AdminAction("anomaly.remove|" + anomaly.id(), "Remove", true)), null);
+                            new AdminPanelRegistry.AdminAction("anomaly.remove|" + anomaly.id(), "Delete", true)), null);
             if (state.collision() == VeilAnomaly.Collision.SOLID || state.visibility() != VeilAnomaly.Visibility.HIDDEN)
                 active.add(section("Active at Veil level " + veilLevel, entry));
             all.put(anomaly.id().toString(), entry);
