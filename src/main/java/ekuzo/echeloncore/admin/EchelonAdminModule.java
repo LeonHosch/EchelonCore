@@ -33,11 +33,11 @@ public final class EchelonAdminModule {
     private static final String ANOMALY_EDIT = ANOMALIES + "/edit/";
     private static final String ADVANCEMENTS = "advancements";
     private static final List<AdminPanelRegistry.AdminTab> TABS = List.of(
-            new AdminPanelRegistry.AdminTab(OVERVIEW, "Overview"),
-            new AdminPanelRegistry.AdminTab(KINGDOM, "Kingdom"),
-            new AdminPanelRegistry.AdminTab(VEIL, "Veil"),
-            new AdminPanelRegistry.AdminTab(ANOMALIES, "Anomalies"),
-            new AdminPanelRegistry.AdminTab(ADVANCEMENTS, "Advancements"));
+            new AdminPanelRegistry.AdminTab(KINGDOM, "Kingdom", AdminPanelRegistry.MODERATE),
+            new AdminPanelRegistry.AdminTab(VEIL, "Veil", AdminPanelRegistry.MODERATE),
+            new AdminPanelRegistry.AdminTab(ANOMALIES, "Anomalies", AdminPanelRegistry.BUILD),
+            new AdminPanelRegistry.AdminTab(ADVANCEMENTS, "Advancements", AdminPanelRegistry.BUILD),
+            new AdminPanelRegistry.AdminTab(OVERVIEW, "Echelon status", AdminPanelRegistry.LOGS));
 
     // Prevent construction of the Echelon module registrar.
     private EchelonAdminModule() {
@@ -48,7 +48,7 @@ public final class EchelonAdminModule {
         AdminPanelRegistry.register(new AdminPanelRegistry.AdminModule(
                 EchelonCore.id("admin"), "EchelonCore",
                 "Kingdom leadership, Veil state, anomalies and Echelon progression.",
-                "minecraft:golden_helmet", OVERVIEW, EchelonAdminModule::page, EchelonAdminModule::action));
+                "minecraft:golden_helmet", OVERVIEW, EchelonAdminModule::page, EchelonAdminModule::action, TABS));
     }
 
     // Route a requested Echelon tab to freshly calculated server state.
