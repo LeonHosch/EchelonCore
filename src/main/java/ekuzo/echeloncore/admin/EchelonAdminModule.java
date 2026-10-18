@@ -1,5 +1,6 @@
 package ekuzo.echeloncore.admin;
 
+import ekuzo.crazyworldprogression.admin.AdminCategories;
 import ekuzo.crazyworldprogression.admin.AdminPanelRegistry;
 import ekuzo.crazyworldprogression.currency.CurrencyRegistry;
 import ekuzo.crazyworldprogression.currency.CurrencyService;
@@ -34,9 +35,8 @@ public final class EchelonAdminModule {
     private static final String ADVANCEMENTS = "advancements";
     private static final List<AdminPanelRegistry.AdminTab> TABS = List.of(
             new AdminPanelRegistry.AdminTab(KINGDOM, "Kingdom", AdminPanelRegistry.MODERATE),
-            new AdminPanelRegistry.AdminTab(VEIL, "Veil", AdminPanelRegistry.MODERATE),
             new AdminPanelRegistry.AdminTab(ANOMALIES, "Anomalies", AdminPanelRegistry.BUILD),
-            new AdminPanelRegistry.AdminTab(ADVANCEMENTS, "Advancements", AdminPanelRegistry.BUILD),
+            new AdminPanelRegistry.AdminTab(ADVANCEMENTS, "Advancements", AdminPanelRegistry.LOGS),
             new AdminPanelRegistry.AdminTab(OVERVIEW, "Echelon status", AdminPanelRegistry.LOGS));
 
     // Prevent construction of the Echelon module registrar.
@@ -51,15 +51,22 @@ public final class EchelonAdminModule {
                 "minecraft:golden_helmet", OVERVIEW, EchelonAdminModule::page, EchelonAdminModule::action, TABS));
     }
 
+    /** The same entry filed under a section heading. */
+    private static AdminPanelRegistry.AdminEntry section(String section, AdminPanelRegistry.AdminEntry entry) {
+        return new AdminPanelRegistry.AdminEntry(entry.title(), entry.detail(), entry.tone(), entry.fields(),
+                entry.actions(), section, entry.preview());
+    }
+
     // Route a requested Echelon tab to freshly calculated server state.
     private static AdminPanelRegistry.AdminPage page(ServerPlayer player, String pageId) {
+        if (AdminCategories.owns(pageId)) return AdminCategories.page(player, pageId, TABS);
         if (pageId.equals(ANOMALY_NEW)) return newAnomalyPage(player);
         if (pageId.startsWith(ANOMALY_EDIT)) {
             return anomalyEditorPage(player, Identifier.parse(pageId.substring(ANOMALY_EDIT.length())));
         }
         return switch (pageId) {
             case KINGDOM -> kingdomPage(player);
-            case VEIL -> veilPage(player);
+            case VEIL -> kingdomPage(player);
             case ANOMALIES -> anomaliesPage(player);
             case ADVANCEMENTS -> advancementsPage(player);
             default -> overviewPage(player);
@@ -87,55 +94,49 @@ public final class EchelonAdminModule {
     }
 
     // Show the current king and let an administrator appoint an online player or clear the crown.
+    /** Kingdom: the king (search to appoint, clear to change) and the Veil level and radii. */
     private static AdminPanelRegistry.AdminPage kingdomPage(ServerPlayer player) {
         MinecraftServer server = player.level().getServer();
         Optional<UUID> king = KingService.getKing(server);
         List<AdminPanelRegistry.AdminEntry> entries = new ArrayList<>();
-        entries.add(new AdminPanelRegistry.AdminEntry("Current ruler",
-                king.map(id -> kingName(server, id) + " · " + id).orElse("The throne is vacant"),
-                king.isPresent() ? GOOD : NORMAL, king.isPresent()
-                ? List.of(new AdminPanelRegistry.AdminAction("king.clear", "Clear", true)) : List.of()));
-        for (ServerPlayer candidate : server.getPlayerList().getPlayers()) {
-            boolean current = king.filter(candidate.getUUID()::equals).isPresent();
-            entries.add(new AdminPanelRegistry.AdminEntry(candidate.getName().getString(),
-                    current ? "Currently appointed king" : candidate.getUUID().toString(), current ? GOOD : NORMAL,
-                    current ? List.of() : List.of(new AdminPanelRegistry.AdminAction(
-                            "king.set|" + candidate.getUUID(), "Appoint", true))));
+        if (king.isPresent()) {
+            entries.add(AdminPanelRegistry.AdminEntry.editor("King", "👑 " + kingName(server, king.get()),
+                    "Clear the king to appoint someone else.", List.of(),
+                    List.of(new AdminPanelRegistry.AdminAction("king.clear", "Clear king", true))));
+        } else {
+            entries.add(AdminPanelRegistry.AdminEntry.editor("King", "Appoint a king", "The throne is vacant.",
+                    List.of(new AdminPanelRegistry.AdminField("king_name", "Player (type to search)", "name", "", 32,
+                            server.getPlayerList().getPlayers().stream().map(p -> p.getGameProfile().name())
+                                    .sorted(String.CASE_INSENSITIVE_ORDER).toList())),
+                    List.of(new AdminPanelRegistry.AdminAction("king.appoint", "Appoint", true))));
         }
-        return page(KINGDOM, "Kingdom", "Leadership controls apply immediately", entries);
-    }
-
-    // Explain the progression-derived Veil level and expose a safe runtime re-index operation.
-    private static AdminPanelRegistry.AdminPage veilPage(ServerPlayer player) {
-        MinecraftServer server = player.level().getServer();
         int level = VeilManager.getVeilLevel(server);
-        VeilManager.Radii current = VeilManager.getRadii(server,
-                player.level().dimension().identifier(), level);
-        List<AdminPanelRegistry.AdminEntry> entries = new ArrayList<>();
-        entries.add(new AdminPanelRegistry.AdminEntry("Current Veil Level", Integer.toString(level), GOOD,
-                List.of(new AdminPanelRegistry.AdminAction("veil.refresh", "Refresh", false))));
-        entries.add(AdminPanelRegistry.AdminEntry.info("Progression ownership",
-                "The level is derived from global skill-tree effects and is intentionally not overwritten here."));
-        entries.add(new AdminPanelRegistry.AdminEntry("World radii",
-                "Set two boundaries for one exact world and Veil Level. No entry means no world Veil.", NORMAL,
+        entries.add(AdminPanelRegistry.AdminEntry.editor("Veil", "Veil level " + level,
+                "Comes from global skill-tree effects; it is not set here.", List.of(),
+                List.of(new AdminPanelRegistry.AdminAction("veil.refresh", "Recalculate", false))));
+        VeilManager.Radii current = VeilManager.getRadii(server, player.level().dimension().identifier(), level);
+        entries.add(AdminPanelRegistry.AdminEntry.editor("Veil radii", "Add a radius",
+                "Inner and outer boundary for one world at one Veil level. Saving an existing world and level replaces it.",
                 List.of(new AdminPanelRegistry.AdminField("veil_dimension", "World", "minecraft:overworld",
                                 player.level().dimension().identifier().toString(), 128,
                                 server.levelKeys().stream().map(key -> key.identifier().toString()).sorted().toList()),
-                        new AdminPanelRegistry.AdminField("veil_level", "Level", "0",
-                                Integer.toString(level), 10, List.of()),
+                        new AdminPanelRegistry.AdminField("veil_level", "Level", "0", Integer.toString(level), 10, List.of()),
                         new AdminPanelRegistry.AdminField("veil_inner", "Inner radius", "1000",
                                 current == null ? "1000" : Double.toString(current.inner()), 12, List.of()),
                         new AdminPanelRegistry.AdminField("veil_outer", "Outer radius", "1200",
                                 current == null ? "1200" : Double.toString(current.outer()), 12, List.of())),
-                List.of(new AdminPanelRegistry.AdminAction("veil.set_radii", "Save", false))));
-        VeilManager.configuredRadii(server).entrySet().stream().sorted(Map.Entry.comparingByKey())
-                .forEach(entry -> entries.add(new AdminPanelRegistry.AdminEntry(entry.getKey(),
-                        "Inner " + entry.getValue().inner() + " · outer " + entry.getValue().outer(),
-                        GOOD, List.of(new AdminPanelRegistry.AdminAction(
-                        "veil.remove_radii|" + entry.getKey(), "Remove", true)))));
-        entries.add(AdminPanelRegistry.AdminEntry.info("Active collision set",
-                VeilAnomalyService.solidAnomalyCount(server) + " anomaly/anomalies require player rejection"));
-        return page(VEIL, "The Veil", "Global level and anomaly runtime state", entries);
+                List.of(new AdminPanelRegistry.AdminAction("veil.set_radii", "Add", false))));
+        var radii = VeilManager.configuredRadii(server);
+        if (radii.isEmpty()) entries.add(AdminPanelRegistry.AdminEntry.editor("Veil radii", "No radii",
+                "Without a radius a world has no Veil.", List.of(), List.of()));
+        radii.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry -> entries.add(
+                AdminPanelRegistry.AdminEntry.editor("Veil radii", entry.getKey(),
+                        "inner " + entry.getValue().inner() + " · outer " + entry.getValue().outer(), List.of(),
+                        List.of(new AdminPanelRegistry.AdminAction("veil.remove_radii|" + entry.getKey(), "Delete", true)))));
+        entries.add(AdminPanelRegistry.AdminEntry.editor("Veil", "Anomalies with collision",
+                VeilAnomalyService.solidAnomalyCount(server) + " push players out right now", List.of(), List.of()));
+        return new AdminPanelRegistry.AdminPage(KINGDOM, "Kingdom", "King and the Veil", TABS, entries,
+                AdminPanelRegistry.PageLayout.EDITOR);
     }
 
     // List every placed anomaly, its current state, and a confirmed removal control.
@@ -143,18 +144,25 @@ public final class EchelonAdminModule {
         MinecraftServer server = player.level().getServer();
         int veilLevel = VeilManager.getVeilLevel(server);
         List<AdminPanelRegistry.AdminEntry> entries = new ArrayList<>();
-        entries.add(new AdminPanelRegistry.AdminEntry("Create anomaly", "Place a persistent Veil anomaly.", GOOD,
-                List.of(), List.of(AdminPanelRegistry.AdminAction.navigate("Create", ANOMALY_NEW)), null));
+        entries.add(section("Create", new AdminPanelRegistry.AdminEntry("Create anomaly", "Place a persistent Veil anomaly.", GOOD,
+                List.of(), List.of(AdminPanelRegistry.AdminAction.navigate("Create", ANOMALY_NEW)), null)));
+        List<AdminPanelRegistry.AdminEntry> active = new ArrayList<>();
+        Map<String, AdminPanelRegistry.AdminEntry> all = new java.util.LinkedHashMap<>();
         for (VeilAnomaly anomaly : VeilAnomalyService.anomalies(server)) {
             VeilAnomaly.AnomalyState state = anomaly.stateAt(veilLevel);
-            entries.add(new AdminPanelRegistry.AdminEntry(anomaly.id().toString(),
+            AdminPanelRegistry.AdminEntry entry = new AdminPanelRegistry.AdminEntry(anomaly.id().toString(),
                     anomaly.shape().serializedName() + " · " + anomaly.boundaryMode().serializedName() + " · "
                             + state.collision().serializedName() + "/" + state.visibility().serializedName()
                             + " · " + anomaly.dimension(), state.collision() == VeilAnomaly.Collision.SOLID
                     ? DANGER : NORMAL, List.of(),
                     List.of(AdminPanelRegistry.AdminAction.navigate("Edit", ANOMALY_EDIT + anomaly.id()),
-                            new AdminPanelRegistry.AdminAction("anomaly.remove|" + anomaly.id(), "Remove", true)), null));
+                            new AdminPanelRegistry.AdminAction("anomaly.remove|" + anomaly.id(), "Remove", true)), null);
+            if (state.collision() == VeilAnomaly.Collision.SOLID || state.visibility() != VeilAnomaly.Visibility.HIDDEN)
+                active.add(section("Active at Veil level " + veilLevel, entry));
+            all.put(anomaly.id().toString(), entry);
         }
+        entries.addAll(active);
+        entries.addAll(AdminCategories.sectioned(server, "anomaly", "All anomalies", all, ANOMALIES));
         return new AdminPanelRegistry.AdminPage(ANOMALIES, "Veil anomalies",
                 VeilAnomalyService.anomalies(server).size() + " persistent definition(s)", TABS, entries,
                 AdminPanelRegistry.PageLayout.PREVIEW_CARDS);
@@ -264,6 +272,14 @@ public final class EchelonAdminModule {
     private static AdminPanelRegistry.ActionResult action(ServerPlayer player, String pageId, String actionId,
                                                           Map<String, String> values) {
         MinecraftServer server = player.level().getServer();
+        if (AdminCategories.owns(pageId)) return AdminCategories.action(player, pageId, actionId, values);
+        if (actionId.equals("king.appoint")) {
+            String name = values.getOrDefault("king_name", "").trim();
+            ServerPlayer candidate = server.getPlayerList().getPlayerByName(name);
+            if (candidate == null) return AdminPanelRegistry.ActionResult.failure("No online player named " + name);
+            KingService.setKing(server, candidate.getUUID());
+            return AdminPanelRegistry.ActionResult.success("Appointed " + candidate.getGameProfile().name() + " as king");
+        }
         if (actionId.equals("anomaly.create")) {
             Identifier id = Identifier.parse(values.get("anomaly_id").trim());
             VeilAnomaly anomaly = new VeilAnomaly(id, Identifier.parse(values.get("dimension").trim()),
