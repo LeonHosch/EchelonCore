@@ -10,6 +10,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import ekuzo.echeloncore.mixin.client.RenderPipelinesAccessor;
 import ekuzo.echeloncore.mixin.client.RenderTypeAccessor;
+import ekuzo.crazyworldprogression.worldboundary.restriction.ClientRestrictions;
+import ekuzo.crazyworldprogression.worldboundary.restriction.Restriction;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -67,9 +69,9 @@ public final class VeilAnomalyRenderer {
     private static void renderBlackout(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null || !minecraft.gameRenderer.mainCamera().isInitialized()) return;
-        ClientVeilAnomalies.AnomalyVision vision = ClientVeilAnomalies.visionAt(
+        ClientRestrictions.RestrictionVision vision = ClientRestrictions.visionAt(
                 minecraft.level.dimension().identifier(), minecraft.gameRenderer.mainCamera().position());
-        if (vision == ClientVeilAnomalies.AnomalyVision.BLACKOUT) {
+        if (vision == ClientRestrictions.RestrictionVision.BLACKOUT) {
             graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), 0xFF000000);
         }
     }
@@ -79,9 +81,9 @@ public final class VeilAnomalyRenderer {
         if (Minecraft.getInstance().level == null) return;
         Identifier dimension = Minecraft.getInstance().level.dimension().identifier();
         Vec3 camera = context.levelState().cameraRenderState.pos;
-        for (ClientVeilAnomalies.VisibleAnomaly visible : ClientVeilAnomalies.visibleAnomalies()) {
-            VeilAnomaly anomaly = visible.anomaly();
-            if (visible.visibility() == VeilAnomaly.Visibility.HIDDEN
+        for (ClientRestrictions.VisibleRestriction visible : ClientRestrictions.visibleRestrictions()) {
+            Restriction anomaly = visible.restriction();
+            if (visible.visibility() == Restriction.Visibility.HIDDEN
                     || !anomaly.dimension().equals(dimension)
                     || anomaly.bounds().distanceToSqr(camera) > RENDER_DISTANCE_SQUARED) continue;
             CachedMesh cached = CACHE.get(anomaly.id());
@@ -94,16 +96,16 @@ public final class VeilAnomalyRenderer {
     }
 
     // Translate one cached local-space mesh to camera space and submit its quads.
-    private static void submitMesh(LevelRenderContext context, Vec3 camera, VeilAnomaly anomaly,
-                                   Mesh mesh, VeilAnomaly.Collision collision,
-                                   VeilAnomaly.Visibility visibility) {
+    private static void submitMesh(LevelRenderContext context, Vec3 camera, Restriction anomaly,
+                                   Mesh mesh, Restriction.Collision collision,
+                                   Restriction.Visibility visibility) {
         PoseStack poseStack = context.poseStack();
         poseStack.pushPose();
         poseStack.translate(anomaly.centerX() - camera.x, anomaly.centerY() - camera.y, anomaly.centerZ() - camera.z);
-        int alpha = visibility == VeilAnomaly.Visibility.OPAQUE ? 255 : 135;
-        int color = collision == VeilAnomaly.Collision.PASSABLE && visibility == VeilAnomaly.Visibility.OPAQUE
+        int alpha = visibility == Restriction.Visibility.OPAQUE ? 255 : 135;
+        int color = collision == Restriction.Collision.PASSABLE && visibility == Restriction.Visibility.OPAQUE
                 ? rgba(210, 92, 176, alpha) : rgba(32, 4, 48, alpha);
-        RenderType renderType = visibility == VeilAnomaly.Visibility.OPAQUE
+        RenderType renderType = visibility == Restriction.Visibility.OPAQUE
                 ? OPAQUE_RENDER_TYPE : RenderTypes.debugQuads();
         context.submitNodeCollector().submitCustomGeometry(poseStack, renderType,
                 (pose, vertices) -> emit(pose, vertices, mesh, color));
@@ -134,7 +136,7 @@ public final class VeilAnomalyRenderer {
     }
 
     // Build local-space quads once for one anomaly geometry revision.
-    private static Mesh buildMesh(VeilAnomaly anomaly) {
+    private static Mesh buildMesh(Restriction anomaly) {
         List<Vertex> vertices = new ArrayList<>();
         switch (anomaly.shape()) {
             case CUBE -> cube(vertices, anomaly.sizeX(), anomaly.sizeY(), anomaly.sizeZ());
@@ -220,7 +222,7 @@ public final class VeilAnomalyRenderer {
     }
 
     // Hash only geometry fields so state-only changes keep the cached mesh.
-    private static int geometryHash(VeilAnomaly anomaly) {
+    private static int geometryHash(Restriction anomaly) {
         return java.util.Objects.hash(anomaly.shape(), anomaly.sizeX(), anomaly.sizeY(), anomaly.sizeZ());
     }
 

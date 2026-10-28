@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "echelon-core:pathfinder_chestplate",
+    "echelon-core:guardian_of_life_chestplate",
+    "echelon-core:sage_chestplate",
+    "echelon-core:icarus_folly_chestplate",
+    "echelon-core:bloodletters_pact_chestplate",
+    "echelon-core:stormcaller_chestplate"
+  ]
+}

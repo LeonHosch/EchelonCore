@@ -1,0 +1,12 @@
+# Guardian of Life set (EchelonCore): defensive armor. The 4-piece bonus unlocks the Sanctuary passive of the
+# Oath of the Lifebound shield (see ekuzo.echeloncore.item.Sanctuary).
+name: Guardian of Life Set
+pieces:
+  - echelon-core:guardian_of_life_helmet
+  - echelon-core:guardian_of_life_chestplate
+  - echelon-core:guardian_of_life_leggings
+  - echelon-core:guardian_of_life_boots
+bonuses:
+  - pieces: 4
+    stats:
+      - unlockSanctuary(1)

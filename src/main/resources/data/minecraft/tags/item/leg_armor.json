@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "echelon-core:pathfinder_leggings",
+    "echelon-core:guardian_of_life_leggings",
+    "echelon-core:sage_leggings",
+    "echelon-core:icarus_folly_leggings",
+    "echelon-core:bloodletters_pact_leggings",
+    "echelon-core:stormcaller_leggings"
+  ]
+}

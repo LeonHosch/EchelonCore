@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "echelon-core:sage"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "echelon-core:sage"
+      }
+    ]
+  }
+}

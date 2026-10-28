@@ -1,0 +1,13 @@
+# Icarus' Folly set (EchelonCore): glass-cannon armor. Hubris (CWP's Hubris class) builds damage while the wearer
+# stays unhurt, at the price of taking more; a hit from a Martyr's Remorse party member drops the stacks safely.
+name: "Icarus' Folly Set"
+pieces:
+  - echelon-core:icarus_folly_helmet
+  - echelon-core:icarus_folly_chestplate
+  - echelon-core:icarus_folly_leggings
+  - echelon-core:icarus_folly_boots
+bonuses:
+  - pieces: 4
+    stats:
+      - addAttackDamage(-20)
+      - unlockHubris(1)

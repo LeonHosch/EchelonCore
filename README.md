@@ -12,7 +12,7 @@ See [performance design and profiling](docs/performance.md) for Echelon-specific
 | Java | 25 or newer |
 | Fabric Loader | 0.19.3 or newer |
 | Fabric API | 0.158.0+26.2 |
-| Crazy World Progression | 1.0.0 or newer |
+| Crazy World Progression | 1.1.0 or newer |
 
 EchelonCore and CWP must both be installed on the client and server. CWP owns the skill-tree screen and networking; EchelonCore owns the content displayed in it and Echelon's client-side veil effects.
 
@@ -188,8 +188,8 @@ EchelonCore currently ships no captured portal template or placed portal. Future
 Install the following in the `mods` directory on every client and the server:
 
 1. Fabric API
-2. `crazy-world-progression-1.0.0.jar`
-3. `echelon-core-1.0.0.jar`
+2. `crazy-world-progression-1.1.0.jar`
+3. `echelon-core-1.1.0.jar`
 
 Keep the mod versions identical on both sides. EchelonCore will not load without CWP.
 
@@ -247,8 +247,8 @@ Clone both repositories into that layout, install a Java 25 JDK, and run command
 Because CWP is included as a Gradle subproject, this compiles and packages both repositories. The usable mod JARs are:
 
 ```text
-../CrazyWorldProgression/build/libs/crazy-world-progression-1.0.0.jar
-build/libs/echelon-core-1.0.0.jar
+../CrazyWorldProgression/build/libs/crazy-world-progression-1.1.0.jar
+build/libs/echelon-core-1.1.0.jar
 ```
 
 Ignore `-sources.jar` when installing the mods.

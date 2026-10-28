@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "echelon-core:pathfinder_ring",
+    "echelon-core:pathfinder_necklace",
+    "echelon-core:steadfast_charm",
+    "echelon-core:stormcaller_ring",
+    "echelon-core:stormcaller_necklace"
+  ]
+}

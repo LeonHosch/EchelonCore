@@ -9,11 +9,9 @@ import ekuzo.echeloncore.advancement.EchelonAdvancementManager;
 import ekuzo.echeloncore.admin.EchelonAdminModule;
 import ekuzo.echeloncore.command.KingCommands;
 import ekuzo.echeloncore.command.VeilCommands;
-import ekuzo.echeloncore.king.KingService;
-import ekuzo.echeloncore.veil.VeilManager;
-import ekuzo.echeloncore.veil.VeilRadiusNetworking;
-import ekuzo.echeloncore.veil.anomaly.VeilAnomalyNetworking;
-import ekuzo.echeloncore.veil.anomaly.VeilAnomalyService;
+import ekuzo.crazyworldprogression.worldboundary.WorldLeaderService;
+import ekuzo.echeloncore.network.RequiredClientMods;
+import ekuzo.crazyworldprogression.worldboundary.AdvancedWorldBoundary;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -38,24 +36,31 @@ public final class EchelonCore implements ModInitializer {
     // Register all concrete Echelon content and policies with CWP, then start Echelon-owned gameplay systems.
     @Override
     public void onInitialize() {
+        RequiredClientMods.register();
         registerCurrencies();
+        ekuzo.echeloncore.item.EchelonItems.register();
+        ekuzo.echeloncore.block.EchelonBlocks.register();
+        ekuzo.echeloncore.entity.EchelonEntities.register();
+        ekuzo.echeloncore.balance.VanillaWeapons.register();
+        // CWP's reforging (Enchanting by default) is called Soulforging in Echelon; its proficiency is Soulweaving.
+        ekuzo.crazyworldprogression.reforge.ReforgeBranding.set(new ekuzo.crazyworldprogression.reforge.ReforgeBranding(
+                "Soulforging", "Reforge soul", "Soul reforged: ", "Soulweaving"));
         EchelonAdminModule.register();
         RandomEventRegistry.registerSource(MOD_ID, MOD_ID, "random-events.yml");
         BaselineStatRegistry.registerSource(id("default-baseline"), MOD_ID, "baseline-stats.yml");
         SkillTreeRegistry.registerSource(MOD_ID, MOD_ID, "skilltrees");
+        AdvancedWorldBoundary.registerLevelStat("addVeilLevel", "stat.echelon-core.veil_level");
+        ekuzo.crazyworldprogression.worldboundary.bonus.BonusAreas.setDisplayName("Kingdom area");
         SkillTreeRegistry.registerPurchasePolicy(id("kingdom-progression"), (player, tree) ->
-                KingService.isKing(player.level().getServer(), player.getUUID())
+                WorldLeaderService.isLeader(player.level().getServer(), player.getUUID())
                         ? SkillTreeRegistry.PurchaseDecision.ALLOWED
                         : SkillTreeRegistry.PurchaseDecision.denied("Only the elected king can unlock this tree."));
-        VeilManager.initialize();
-        VeilRadiusNetworking.register();
-        VeilAnomalyNetworking.registerPayloadType();
-        VeilAnomalyService.initialize();
         EchelonAdvancementManager.initialize();
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> KingService.getKing(server));
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> WorldLeaderService.getLeader(server));
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             KingCommands.register(dispatcher);
             VeilCommands.register(dispatcher);
+            ekuzo.crazyworldprogression.worldboundary.bonus.BonusAreas.registerCommands(dispatcher, "kingdomarea");
         });
         LOGGER.info("Initialized Echelon gameplay systems");
     }

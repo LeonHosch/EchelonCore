@@ -1,0 +1,15 @@
+# Bloodletter's Pact set (EchelonCore): heals only by dealing damage. Mechanics live in CWP's BloodPact class.
+name: "Bloodletter's Pact Set"
+pieces:
+  - echelon-core:bloodletters_pact_helmet
+  - echelon-core:bloodletters_pact_chestplate
+  - echelon-core:bloodletters_pact_leggings
+  - echelon-core:bloodletters_pact_boots
+bonuses:
+  - pieces: 2
+    stats:
+      - addLifeSteal(10)
+      - unlockBloodPact(1)
+  - pieces: 4
+    stats:
+      - unlockBloodLust(1)

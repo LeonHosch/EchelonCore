@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "echelon-core:bloodletters_pact"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "echelon-core:bloodletters_pact"
+      }
+    ]
+  }
+}

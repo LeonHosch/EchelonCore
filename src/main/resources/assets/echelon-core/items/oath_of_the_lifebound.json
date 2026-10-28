@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "property": "minecraft:using_item",
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "echelon-core:item/oath_of_the_lifebound"
+    },
+    "on_true": {
+      "type": "minecraft:model",
+      "model": "echelon-core:item/oath_of_the_lifebound_blocking"
+    }
+  }
+}

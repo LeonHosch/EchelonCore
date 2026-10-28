@@ -3,7 +3,7 @@ package ekuzo.echeloncore.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import ekuzo.echeloncore.king.KingService;
+import ekuzo.crazyworldprogression.worldboundary.WorldLeaderService;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -31,7 +31,7 @@ public final class KingCommands {
 
     // Display the current king, resolving an online name when possible.
     private static int showKing(CommandContext<CommandSourceStack> context) {
-        Optional<UUID> king = KingService.getKing(context.getSource().getServer());
+        Optional<UUID> king = WorldLeaderService.getLeader(context.getSource().getServer());
         context.getSource().sendSuccess(() -> king
                 .map(uuid -> Component.literal("The current king is " + displayName(context.getSource(), uuid) + ".")
                         .withStyle(ChatFormatting.GOLD))
@@ -47,7 +47,7 @@ public final class KingCommands {
             return 0;
         }
         NameAndId player = profiles.iterator().next();
-        KingService.setKing(context.getSource().getServer(), player.id());
+        WorldLeaderService.setLeader(context.getSource().getServer(), player.id());
         context.getSource().sendSuccess(() -> Component.literal(player.name() + " is now the king.")
                 .withStyle(ChatFormatting.GOLD), true);
         return 1;
@@ -55,7 +55,7 @@ public final class KingCommands {
 
     // Remove the current appointment without changing any progression unlocks or balances.
     private static int clearKing(CommandContext<CommandSourceStack> context) {
-        KingService.clearKing(context.getSource().getServer());
+        WorldLeaderService.clearLeader(context.getSource().getServer());
         context.getSource().sendSuccess(() -> Component.literal("The current king was cleared.")
                 .withStyle(ChatFormatting.GREEN), true);
         return 1;

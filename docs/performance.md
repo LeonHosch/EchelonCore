@@ -13,6 +13,10 @@ EchelonCore owns the gameplay-specific costs below. The sibling CrazyWorldProgre
 
 The [client Veil renderer](../src/client/java/ekuzo/echeloncore/veil/anomaly/VeilAnomalyRenderer.java) caches geometry between frames and rebuilds it when geometry fields change. Visuals run on the client; server-side boundary and interaction rules remain authoritative.
 
+## Client caching
+
+Follow CrazyWorldProgression's rule in its `docs/performance.md` ("Client caching of read-mostly data"): data a window or HUD shows that rarely changes is cached on the client and only resent when its change key moves, while the server stays authoritative for every action.
+
 ## What to measure for 1.0
 
 Measure worst server ticks during large raid/portal activity, many players crossing anomaly boundaries, Veil Level changes that rebuild projected anomalies, and advancement reconciliation with several established players. Record player count, anomaly count and overlap, projected-instance count, and client frame time separately. Compare integrated single player with a dedicated server. Use profiler samples to decide whether a path needs more caching or batching; no live benchmark is recorded here yet.

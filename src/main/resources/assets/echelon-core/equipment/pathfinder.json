@@ -1,0 +1,6 @@
+{
+  "layers": {
+    "humanoid": [{ "texture": "echelon-core:pathfinder" }],
+    "humanoid_leggings": [{ "texture": "echelon-core:pathfinder" }]
+  }
+}

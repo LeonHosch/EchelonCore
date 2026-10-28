@@ -24,7 +24,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Util;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
-import ekuzo.echeloncore.veil.anomaly.ClientVeilAnomalies;
+import ekuzo.crazyworldprogression.worldboundary.restriction.ClientRestrictions;
+import ekuzo.crazyworldprogression.worldboundary.AdvancedWorldBoundary;
+import ekuzo.crazyworldprogression.worldboundary.ClientBoundaryRadii;
 
 public final class VeilRenderer {
     private static final int SEGMENTS = 512;
@@ -61,7 +63,7 @@ public final class VeilRenderer {
         LevelExtractionEvents.END_EXTRACTION.register(context -> {
             BlockPos spawn = context.level().dimension() == net.minecraft.world.level.Level.OVERWORLD
                     ? context.level().getRespawnData().pos() : BlockPos.ZERO;
-            VeilManager.Radii configured = ClientVeilRadii.get(context.level().dimension().identifier());
+            AdvancedWorldBoundary.Radii configured = ClientBoundaryRadii.get(context.level().dimension().identifier());
             VeilRenderState veil = new VeilRenderState(
                 spawn.getX() + 0.5,
                 spawn.getZ() + 0.5,
@@ -86,8 +88,8 @@ public final class VeilRenderer {
         double x = camera.pos.x - veil.centerX();
         double z = camera.pos.z - veil.centerZ();
         double distanceSquared = x * x + z * z;
-        boolean anomalyVeil = ClientVeilAnomalies.visionAt(level.dimension().identifier(), camera.pos)
-            == ClientVeilAnomalies.AnomalyVision.VEIL;
+        boolean anomalyVeil = ClientRestrictions.visionAt(level.dimension().identifier(), camera.pos)
+            == ClientRestrictions.RestrictionVision.VEIL;
         VeilZone newZone;
 
         if (!Double.isNaN(veil.outerRadius())

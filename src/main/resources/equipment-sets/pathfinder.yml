@@ -1,0 +1,19 @@
+# Pathfinder set (EchelonCore): four armor pieces and two accessories. Bonuses add up as more pieces are worn.
+name: Pathfinder Set
+pieces:
+  - echelon-core:pathfinder_helmet
+  - echelon-core:pathfinder_chestplate
+  - echelon-core:pathfinder_leggings
+  - echelon-core:pathfinder_boots
+  - echelon-core:pathfinder_ring
+  - echelon-core:pathfinder_necklace
+bonuses:
+  - pieces: 2
+    stats:
+      - addMovementSpeed(20)
+  - pieces: 4
+    stats:
+      - addMiningSpeed(500)
+  - pieces: 6
+    stats:
+      - addBlockInteractionRange(2)

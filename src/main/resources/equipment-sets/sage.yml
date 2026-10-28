@@ -1,0 +1,16 @@
+# Martyr's Remorse set (EchelonCore, item IDs echelon-core:sage_*): light support armor. Two pieces turn attacks on allies into heals at the cost of
+# damage; four pieces give part of the damage back. The bonuses add up (-80% + 30% = -50% with all four).
+name: "Martyr's Remorse Set"
+pieces:
+  - echelon-core:sage_helmet
+  - echelon-core:sage_chestplate
+  - echelon-core:sage_leggings
+  - echelon-core:sage_boots
+bonuses:
+  - pieces: 2
+    stats:
+      - addAttackDamage(-80)
+      - unlockAllyHealing(1)
+  - pieces: 4
+    stats:
+      - addAttackDamage(30)

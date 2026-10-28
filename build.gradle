@@ -3,6 +3,8 @@ plugins {
     id 'maven-publish'
 }
 
+evaluationDependsOn(':crazy-world-progression')
+
 loom {
     splitEnvironmentSourceSets()
     mods {
@@ -11,6 +13,24 @@ loom {
             sourceSet sourceSets.client
         }
     }
+    runs {
+        client {
+            // A fixed name keeps the same offline player UUID between test launches (chest locks, clans, friends).
+            programArgs "--username", "Leon"
+        }
+    }
+}
+
+repositories {
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'GeckoLib'
+                url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+            }
+        }
+        filter { includeGroupAndSubgroups('com.geckolib') }
+    }
 }
 
 dependencies {
@@ -18,6 +38,9 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
     implementation project(':crazy-world-progression')
+    implementation "com.geckolib:geckolib-fabric-${project.minecraft_version}:${project.geckolib_version}"
+    // CWP's client API (e.g. the reforge window style) for Echelon's client code.
+    clientImplementation files(project.project(':crazy-world-progression').sourceSets.client.output)
 }
 
 processResources {

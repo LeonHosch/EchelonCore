@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "echelon-core:icarus_folly"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "echelon-core:icarus_folly"
+      }
+    ]
+  }
+}

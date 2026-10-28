@@ -1,0 +1,44 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "on_false": {
+      "type": "minecraft:special",
+      "base": "echelon-core:item/oath_of_the_lifebound",
+      "model": {
+        "type": "geckolib:geckolib"
+      }
+    },
+    "on_true": {
+      "type": "minecraft:special",
+      "base": "echelon-core:item/oath_of_the_lifebound_blocking",
+      "model": {
+        "type": "geckolib:geckolib"
+      }
+    },
+    "property": "minecraft:using_item",
+    "transformation": {
+      "left_rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "right_rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "scale": [
+        1.0,
+        -1.0,
+        -1.0
+      ],
+      "translation": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  }
+}

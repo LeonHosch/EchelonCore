@@ -3,11 +3,17 @@
   "package": "ekuzo.echeloncore.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
+    "ArrowDamageMixin",
+    "FireworkDamageMixin",
+    "LivingEntityBlockMixin",
     "ServerAdvancementManagerMixin"
   ],
   "client": [
+    "client.EntityRenderDispatcherDisguiseMixin",
+    "client.LocalPlayerBlockingSpeedMixin",
     "client.RenderPipelinesAccessor",
-    "client.RenderTypeAccessor"
+    "client.RenderTypeAccessor",
+    "client.WalkAnimationStateAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

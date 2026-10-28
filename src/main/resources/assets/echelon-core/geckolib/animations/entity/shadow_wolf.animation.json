@@ -1,0 +1,141 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "misc.idle": {
+   "loop": true,
+   "animation_length": 3.0,
+   "bones": {
+    "tail": {
+     "rotation": [
+      "15",
+      "math.sin(query.anim_time * 240) * 15",
+      "0"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "math.sin(query.anim_time * 120) * 3",
+      "math.sin(query.anim_time * 60) * 8",
+      "0"
+     ]
+    }
+   }
+  },
+  "move.walk": {
+   "loop": true,
+   "animation_length": 0.6667,
+   "bones": {
+    "leftFrontLeg": {
+     "rotation": [
+      "math.sin(query.anim_time * 540 + 0) * 35",
+      "0",
+      "0"
+     ]
+    },
+    "rightHindLeg": {
+     "rotation": [
+      "math.sin(query.anim_time * 540 + 0) * 30",
+      "0",
+      "0"
+     ]
+    },
+    "rightFrontLeg": {
+     "rotation": [
+      "math.sin(query.anim_time * 540 + 180) * 35",
+      "0",
+      "0"
+     ]
+    },
+    "leftHindLeg": {
+     "rotation": [
+      "math.sin(query.anim_time * 540 + 180) * 30",
+      "0",
+      "0"
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "25",
+      "math.sin(query.anim_time * 540) * 10",
+      "0"
+     ]
+    },
+    "body": {
+     "position": [
+      "0",
+      "math.abs(math.sin(query.anim_time * 540)) * 0.4",
+      "0"
+     ]
+    }
+   }
+  },
+  "attack.bite": {
+   "loop": false,
+   "animation_length": 0.5,
+   "bones": {
+    "head": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.15": [
+       -20,
+       0,
+       0
+      ],
+      "0.3": [
+       15,
+       0,
+       0
+      ],
+      "0.5": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "jaw": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.15": [
+       35,
+       0,
+       0
+      ],
+      "0.3": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "body": {
+     "position": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.3": [
+       0,
+       0,
+       -1.5
+      ],
+      "0.5": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  }
+ }
+}

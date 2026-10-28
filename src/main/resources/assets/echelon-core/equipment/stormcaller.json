@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "echelon-core:stormcaller"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "echelon-core:stormcaller"
+      }
+    ]
+  }
+}

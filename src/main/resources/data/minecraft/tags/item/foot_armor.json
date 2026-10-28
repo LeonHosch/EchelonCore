@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "echelon-core:pathfinder_boots",
+    "echelon-core:guardian_of_life_boots",
+    "echelon-core:sage_boots",
+    "echelon-core:icarus_folly_boots",
+    "echelon-core:bloodletters_pact_boots",
+    "echelon-core:stormcaller_boots"
+  ]
+}

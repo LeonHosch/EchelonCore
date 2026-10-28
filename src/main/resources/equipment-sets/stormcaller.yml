@@ -1,0 +1,21 @@
+# Stormcaller set (EchelonCore): four armor pieces and two accessories. Fast hits build Static Charge; the full set
+# turns it into Static Storm (CWP's StaticCharge class).
+name: Stormcaller Set
+pieces:
+  - echelon-core:stormcaller_helmet
+  - echelon-core:stormcaller_chestplate
+  - echelon-core:stormcaller_leggings
+  - echelon-core:stormcaller_boots
+  - echelon-core:stormcaller_ring
+  - echelon-core:stormcaller_necklace
+bonuses:
+  - pieces: 2
+    stats:
+      - addAttackSpeed(20)
+  - pieces: 4
+    stats:
+      - unlockStaticCharge(1)
+      - addDrawSpeed(20)
+  - pieces: 6
+    stats:
+      - unlockStaticStorm(1)

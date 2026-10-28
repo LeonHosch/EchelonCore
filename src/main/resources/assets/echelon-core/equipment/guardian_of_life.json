@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "echelon-core:guardian_of_life"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "echelon-core:guardian_of_life"
+      }
+    ]
+  }
+}

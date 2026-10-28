@@ -1,0 +1,33 @@
+package ekuzo.echeloncore.client;
+
+import com.geckolib.animatable.client.GeoRenderProvider;
+import com.geckolib.renderer.GeoItemRenderer;
+import com.geckolib.renderer.layer.builtin.AutoGlowingGeoLayer;
+import ekuzo.echeloncore.item.EchelonItems;
+import ekuzo.echeloncore.item.OathOfTheLifeboundItem;
+
+/** Installs the round Lifebound shield model for held and inventory rendering. */
+public final class OathOfTheLifeboundClient {
+    private OathOfTheLifeboundClient() {
+    }
+
+    public static void register() {
+        EchelonItems.OATH_OF_THE_LIFEBOUND.setGeoRenderProvider(new GeoRenderProvider() {
+            private GeoItemRenderer<OathOfTheLifeboundItem> renderer;
+
+            @Override
+            public GeoItemRenderer<OathOfTheLifeboundItem> getGeoItemRenderer() {
+                if (this.renderer == null) {
+                    this.renderer = createRenderer();
+                }
+                return this.renderer;
+            }
+        });
+    }
+
+    private static GeoItemRenderer<OathOfTheLifeboundItem> createRenderer() {
+        var renderer = new GeoItemRenderer<>(EchelonItems.OATH_OF_THE_LIFEBOUND);
+        renderer.withRenderLayer(new AutoGlowingGeoLayer<>(renderer));
+        return renderer;
+    }
+}

@@ -1,0 +1,233 @@
+# Test tree for every proficiency: free, each node adds one rank. Everyone starts at Novice (1), so four nodes
+# per proficiency reach Master (5): Apprentice, Journeyman, Expert, Master.
+skilltree: personal
+priority: 10
+name: Proficiencies
+gname: Fertigkeiten
+icon: minecraft:writable_book
+
+skills:
+  # Cooking
+  - id: cooking_apprentice
+    name: Apprentice Cook
+    gname: Kochlehrling
+    description: Cooking Proficiency Apprentice
+    beschreibung: Kochkunst Lehrling
+    icon: minecraft:bowl
+    previous: none
+    following: 0
+    stats:
+      - addCookingLevel(1)
+
+  - id: cooking_journeyman
+    name: Journeyman Cook
+    gname: Kochgeselle
+    description: Cooking Proficiency Journeyman
+    beschreibung: Kochkunst Geselle
+    icon: minecraft:smoker
+    previous: cooking_apprentice
+    following: 0
+    stats:
+      - addCookingLevel(1)
+
+  - id: cooking_expert
+    name: Expert Cook
+    gname: Kochexperte
+    description: Cooking Proficiency Expert
+    beschreibung: Kochkunst Experte
+    icon: minecraft:cauldron
+    previous: cooking_journeyman
+    following: 0
+    stats:
+      - addCookingLevel(1)
+
+  - id: cooking_master
+    name: Master Cook
+    gname: Kochmeister
+    description: Cooking Proficiency Master
+    beschreibung: Kochkunst Meister
+    icon: minecraft:rabbit_stew
+    previous: cooking_expert
+    following: 0
+    stats:
+      - addCookingLevel(1)
+
+  # Farming
+  - id: farming_apprentice
+    name: Apprentice Farmer
+    gname: Bauernlehrling
+    description: Farming Proficiency Apprentice
+    beschreibung: Landwirtschaft Lehrling
+    icon: minecraft:wheat_seeds
+    previous: none
+    following: 0
+    stats:
+      - addFarmingLevel(1)
+
+  - id: farming_journeyman
+    name: Journeyman Farmer
+    gname: Bauerngeselle
+    description: Farming Proficiency Journeyman
+    beschreibung: Landwirtschaft Geselle
+    icon: minecraft:wheat
+    previous: farming_apprentice
+    following: 0
+    stats:
+      - addFarmingLevel(1)
+
+  - id: farming_expert
+    name: Expert Farmer
+    gname: Bauernexperte
+    description: Farming Proficiency Expert
+    beschreibung: Landwirtschaft Experte
+    icon: minecraft:iron_hoe
+    previous: farming_journeyman
+    following: 0
+    stats:
+      - addFarmingLevel(1)
+
+  - id: farming_master
+    name: Master Farmer
+    gname: Bauernmeister
+    description: Farming Proficiency Master
+    beschreibung: Landwirtschaft Meister
+    icon: minecraft:golden_carrot
+    previous: farming_expert
+    following: 0
+    stats:
+      - addFarmingLevel(1)
+
+  # Fishing
+  - id: fishing_apprentice
+    name: Apprentice Angler
+    gname: Anglerlehrling
+    description: Fishing Proficiency Apprentice
+    beschreibung: Angeln Lehrling
+    icon: minecraft:fishing_rod
+    previous: none
+    following: 0
+    stats:
+      - addFishingLevel(1)
+
+  - id: fishing_journeyman
+    name: Journeyman Angler
+    gname: Anglergeselle
+    description: Fishing Proficiency Journeyman
+    beschreibung: Angeln Geselle
+    icon: minecraft:cod
+    previous: fishing_apprentice
+    following: 0
+    stats:
+      - addFishingLevel(1)
+
+  - id: fishing_expert
+    name: Expert Angler
+    gname: Anglerexperte
+    description: Fishing Proficiency Expert
+    beschreibung: Angeln Experte
+    icon: minecraft:salmon
+    previous: fishing_journeyman
+    following: 0
+    stats:
+      - addFishingLevel(1)
+
+  - id: fishing_master
+    name: Master Angler
+    gname: Anglermeister
+    description: Fishing Proficiency Master
+    beschreibung: Angeln Meister
+    icon: minecraft:tropical_fish
+    previous: fishing_expert
+    following: 0
+    stats:
+      - addFishingLevel(1)
+
+  # Soulweaving (Soulforging at the enchanting table, Divine Protection)
+  - id: soulweaving_apprentice
+    name: Apprentice Soulweaver
+    gname: Seelenweber-Lehrling
+    description: Soulweaving Apprentice
+    beschreibung: Seelenweberei Lehrling
+    icon: minecraft:lapis_lazuli
+    previous: none
+    following: 0
+    stats:
+      - addEnchantingProficiency(1)
+
+  - id: soulweaving_journeyman
+    name: Journeyman Soulweaver
+    gname: Seelenweber-Geselle
+    description: Soulweaving Journeyman
+    beschreibung: Seelenweberei Geselle
+    icon: minecraft:enchanting_table
+    previous: soulweaving_apprentice
+    following: 0
+    stats:
+      - addEnchantingProficiency(1)
+
+  - id: soulweaving_expert
+    name: Expert Soulweaver
+    gname: Seelenweber-Experte
+    description: Soulweaving Expert
+    beschreibung: Seelenweberei Experte
+    icon: minecraft:experience_bottle
+    previous: soulweaving_journeyman
+    following: 0
+    stats:
+      - addEnchantingProficiency(1)
+
+  - id: soulweaving_master
+    name: Master Soulweaver
+    gname: Seelenweber-Meister
+    description: Soulweaving Master
+    beschreibung: Seelenweberei Meister
+    icon: minecraft:nether_star
+    previous: soulweaving_expert
+    following: 0
+    stats:
+      - addEnchantingProficiency(1)
+
+  # Craftsmanship (repairing at the anvil)
+  - id: craftsmanship_apprentice
+    name: Apprentice Craftsman
+    gname: Handwerkslehrling
+    description: Craftsmanship Apprentice
+    beschreibung: Handwerkskunst Lehrling
+    icon: minecraft:iron_ingot
+    previous: none
+    following: 0
+    stats:
+      - addSmithingProficiency(1)
+
+  - id: craftsmanship_journeyman
+    name: Journeyman Craftsman
+    gname: Handwerksgeselle
+    description: Craftsmanship Journeyman
+    beschreibung: Handwerkskunst Geselle
+    icon: minecraft:anvil
+    previous: craftsmanship_apprentice
+    following: 0
+    stats:
+      - addSmithingProficiency(1)
+
+  - id: craftsmanship_expert
+    name: Expert Craftsman
+    gname: Handwerksexperte
+    description: Craftsmanship Expert
+    beschreibung: Handwerkskunst Experte
+    icon: minecraft:diamond
+    previous: craftsmanship_journeyman
+    following: 0
+    stats:
+      - addSmithingProficiency(1)
+
+  - id: craftsmanship_master
+    name: Master Craftsman
+    gname: Handwerksmeister
+    description: Craftsmanship Master
+    beschreibung: Handwerkskunst Meister
+    icon: minecraft:netherite_ingot
+    previous: craftsmanship_expert
+    following: 0
+    stats:
+      - addSmithingProficiency(1)

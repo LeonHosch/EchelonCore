@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "echelon-core:leshen",
+    "echelon-core:corrupted_stag",
+    "echelon-core:shadow_wolf",
+    "echelon-core:falsekin"
+  ]
+}

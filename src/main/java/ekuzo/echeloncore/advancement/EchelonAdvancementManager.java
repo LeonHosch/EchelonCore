@@ -2,8 +2,8 @@ package ekuzo.echeloncore.advancement;
 
 import ekuzo.crazyworldprogression.currency.CurrencyService;
 import ekuzo.echeloncore.EchelonCore;
-import ekuzo.echeloncore.king.KingService;
-import ekuzo.echeloncore.veil.VeilManager;
+import ekuzo.crazyworldprogression.worldboundary.WorldLeaderService;
+import ekuzo.crazyworldprogression.worldboundary.AdvancedWorldBoundary;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.resources.Identifier;
@@ -96,17 +96,17 @@ public final class EchelonAdvancementManager {
     // Award discoveries that belong to the veil and other established Echelon world systems.
     private static void evaluateMysteries(ServerPlayer player) {
         MinecraftServer server = player.level().getServer();
-        double veilDistance = VeilManager.distanceFromSpawn(server, player);
-        VeilManager.Radii radii = VeilManager.getRadii(server, player.level().dimension().identifier(),
-                VeilManager.getVeilLevel(server));
+        double veilDistance = AdvancedWorldBoundary.distanceFromSpawn(server, player);
+        AdvancedWorldBoundary.Radii radii = AdvancedWorldBoundary.getRadii(server, player.level().dimension().identifier(),
+                AdvancedWorldBoundary.getLevel(server));
         if (radii != null && veilDistance > radii.inner()) grant(player, MYSTERIES_ROOT);
         if (!isComplete(player, MYSTERIES_ROOT)) return;
         if (radii != null && veilDistance > radii.outer()) grant(player, id("mysteries/outer_veil"));
         if (CurrencyService.getBalance(server, player.getUUID(), EchelonCore.POWERFUL_SOULS) >= 1L) {
             grant(player, id("mysteries/powerful_soul"));
         }
-        if (VeilManager.getVeilLevel(server) >= 1) grant(player, id("mysteries/veil_level"));
-        if (KingService.isKing(server, player.getUUID())) grant(player, id("mysteries/crowned"));
+        if (AdvancedWorldBoundary.getLevel(server) >= 1) grant(player, id("mysteries/veil_level"));
+        if (WorldLeaderService.isLeader(server, player.getUUID())) grant(player, id("mysteries/crowned"));
         if (player.level().dimension() == Level.NETHER) grant(player, id("mysteries/nether"));
         if (player.level().dimension() == Level.END) grant(player, id("mysteries/end"));
     }

@@ -1,0 +1,270 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "misc.idle": {
+   "loop": true,
+   "animation_length": 6.0,
+   "bones": {
+    "neck": {
+     "rotation": [
+      "math.sin(query.anim_time * 60) * 3",
+      "0",
+      "0"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "math.sin(query.anim_time * 60 + 30) * 4",
+      "math.sin(query.anim_time * 30) * 14",
+      "0"
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "10 + math.sin(query.anim_time * 240) * 8",
+      "0",
+      "math.sin(query.anim_time * 120) * 6"
+     ]
+    },
+    "body": {
+     "position": [
+      "0",
+      "math.sin(query.anim_time * 90) * 0.15",
+      "0"
+     ]
+    }
+   }
+  },
+  "move.walk": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "leftFrontLeg": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 0) * 26",
+      "0",
+      "0"
+     ]
+    },
+    "rightHindLeg": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 0) * 24",
+      "0",
+      "0"
+     ]
+    },
+    "rightFrontLeg": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 180) * 26",
+      "0",
+      "0"
+     ]
+    },
+    "leftHindLeg": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 180) * 24",
+      "0",
+      "0"
+     ]
+    },
+    "leftFrontShin": {
+     "rotation": [
+      "math.max(0, math.cos(query.anim_time * 360)) * 22",
+      "0",
+      "0"
+     ]
+    },
+    "rightFrontShin": {
+     "rotation": [
+      "math.max(0, -math.cos(query.anim_time * 360)) * 22",
+      "0",
+      "0"
+     ]
+    },
+    "leftHindShin": {
+     "rotation": [
+      "-math.max(0, -math.cos(query.anim_time * 360)) * 18",
+      "0",
+      "0"
+     ]
+    },
+    "rightHindShin": {
+     "rotation": [
+      "-math.max(0, math.cos(query.anim_time * 360)) * 18",
+      "0",
+      "0"
+     ]
+    },
+    "neck": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 * 2) * 3",
+      "0",
+      "0"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "-math.sin(query.anim_time * 360 * 2) * 3",
+      "0",
+      "0"
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "15 + math.sin(query.anim_time * 360 * 2) * 6",
+      "0",
+      "0"
+     ]
+    },
+    "body": {
+     "position": [
+      "0",
+      "math.abs(math.sin(query.anim_time * 360)) * 0.4",
+      "0"
+     ]
+    }
+   }
+  },
+  "attack.swing": {
+   "loop": false,
+   "animation_length": 0.9,
+   "bones": {
+    "neck": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.25": [
+       38,
+       0,
+       0
+      ],
+      "0.45": [
+       30,
+       0,
+       0
+      ],
+      "0.7": [
+       -10,
+       0,
+       0
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.25": [
+       22,
+       0,
+       0
+      ],
+      "0.45": [
+       10,
+       0,
+       0
+      ],
+      "0.7": [
+       -20,
+       0,
+       0
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "body": {
+     "position": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.25": [
+       0,
+       -0.5,
+       1.5
+      ],
+      "0.45": [
+       0,
+       0,
+       -3.0
+      ],
+      "0.7": [
+       0,
+       0,
+       -1.0
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "leftFrontLeg": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.25": [
+       -15,
+       0,
+       0
+      ],
+      "0.45": [
+       20,
+       0,
+       0
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "rightFrontLeg": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.25": [
+       -15,
+       0,
+       0
+      ],
+      "0.45": [
+       20,
+       0,
+       0
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "echelon-core:blocks/divine_altar",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "echelon-core:divine_altar"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ]
+}

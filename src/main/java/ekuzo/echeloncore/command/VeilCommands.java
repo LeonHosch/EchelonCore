@@ -6,9 +6,9 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import ekuzo.echeloncore.EchelonCore;
-import ekuzo.echeloncore.veil.VeilManager;
-import ekuzo.echeloncore.veil.anomaly.VeilAnomaly;
-import ekuzo.echeloncore.veil.anomaly.VeilAnomalyService;
+import ekuzo.crazyworldprogression.worldboundary.AdvancedWorldBoundary;
+import ekuzo.crazyworldprogression.worldboundary.restriction.Restriction;
+import ekuzo.crazyworldprogression.worldboundary.restriction.RestrictionService;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -20,10 +20,10 @@ import net.minecraft.world.phys.Vec3;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ekuzo.echeloncore.veil.anomaly.VeilAnomaly.Collision.SOLID;
-import static ekuzo.echeloncore.veil.anomaly.VeilAnomaly.BoundaryMode.KEEP_OUT;
-import static ekuzo.echeloncore.veil.anomaly.VeilAnomaly.BlockInteraction.AUTOMATIC;
-import static ekuzo.echeloncore.veil.anomaly.VeilAnomaly.Visibility.OPAQUE;
+import static ekuzo.crazyworldprogression.worldboundary.restriction.Restriction.Collision.SOLID;
+import static ekuzo.crazyworldprogression.worldboundary.restriction.Restriction.BoundaryMode.KEEP_OUT;
+import static ekuzo.crazyworldprogression.worldboundary.restriction.Restriction.BlockInteraction.AUTOMATIC;
+import static ekuzo.crazyworldprogression.worldboundary.restriction.Restriction.Visibility.OPAQUE;
 
 /** Operator placement and state editing commands for persistent Veil anomalies. */
 public final class VeilCommands {
@@ -76,15 +76,15 @@ public final class VeilCommands {
     private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> createBranch() {
         return Commands.literal("create").then(Commands.argument("id", StringArgumentType.word())
                 .then(Commands.literal("sphere")
-                        .then(positiveDouble("radius").executes(context -> create(context, VeilAnomaly.Shape.SPHERE))))
+                        .then(positiveDouble("radius").executes(context -> create(context, Restriction.Shape.SPHERE))))
                 .then(Commands.literal("cylinder").then(positiveDouble("radius")
-                        .then(positiveDouble("height").executes(context -> create(context, VeilAnomaly.Shape.CYLINDER)))))
+                        .then(positiveDouble("height").executes(context -> create(context, Restriction.Shape.CYLINDER)))))
                 .then(Commands.literal("cube").then(positiveDouble("width")
                         .then(positiveDouble("height").then(positiveDouble("depth")
-                                .executes(context -> create(context, VeilAnomaly.Shape.CUBE))))))
+                                .executes(context -> create(context, Restriction.Shape.CUBE))))))
                 .then(Commands.literal("pyramid").then(positiveDouble("width")
                         .then(positiveDouble("height").then(positiveDouble("depth")
-                                .executes(context -> create(context, VeilAnomaly.Shape.PYRAMID)))))));
+                                .executes(context -> create(context, Restriction.Shape.PYRAMID)))))));
     }
 
     // Create a positive finite dimension argument shared by every geometry branch.
@@ -96,15 +96,15 @@ public final class VeilCommands {
     private static com.mojang.brigadier.builder.RequiredArgumentBuilder<CommandSourceStack, String> idArgument() {
         return Commands.argument("id", StringArgumentType.word())
                 .suggests((context, builder) -> SharedSuggestionProvider.suggest(
-                        VeilAnomalyService.anomalies(context.getSource().getServer()).stream()
+                        RestrictionService.restrictions(context.getSource().getServer()).stream()
                                 .map(anomaly -> anomaly.id().toString()).toList(), builder));
     }
 
     // Show current Veil Level and anomaly collision-index totals.
     private static int status(CommandContext<CommandSourceStack> context) {
-        int level = VeilManager.getVeilLevel(context.getSource().getServer());
-        int total = VeilAnomalyService.anomalies(context.getSource().getServer()).size();
-        int solid = VeilAnomalyService.solidAnomalyCount(context.getSource().getServer());
+        int level = AdvancedWorldBoundary.getLevel(context.getSource().getServer());
+        int total = RestrictionService.restrictions(context.getSource().getServer()).size();
+        int solid = RestrictionService.solidRestrictionCount(context.getSource().getServer());
         context.getSource().sendSuccess(() -> Component.literal("Veil Level " + level + ": " + total
                 + " anomaly/anomalies, " + solid + " in the solid collision index.").withStyle(ChatFormatting.DARK_PURPLE), false);
         return 1;
@@ -112,12 +112,12 @@ public final class VeilCommands {
 
     // List all placed anomalies with resolved state at the current Veil Level.
     private static int list(CommandContext<CommandSourceStack> context) {
-        List<VeilAnomaly> anomalies = VeilAnomalyService.anomalies(context.getSource().getServer());
-        int level = VeilManager.getVeilLevel(context.getSource().getServer());
+        List<Restriction> anomalies = RestrictionService.restrictions(context.getSource().getServer());
+        int level = AdvancedWorldBoundary.getLevel(context.getSource().getServer());
         context.getSource().sendSuccess(() -> Component.literal("Veil anomalies (" + anomalies.size() + ")")
                 .withStyle(ChatFormatting.DARK_PURPLE), false);
         anomalies.forEach(anomaly -> {
-            VeilAnomaly.AnomalyState state = anomaly.stateAt(level);
+            Restriction.RestrictionState state = anomaly.stateAt(level);
             context.getSource().sendSuccess(() -> Component.literal(anomaly.id() + " - "
                     + anomaly.shape().serializedName() + " in " + anomaly.dimension() + " ["
                     + anomaly.boundaryMode().serializedName() + ", " + state.collision().serializedName() + ", "
@@ -129,7 +129,7 @@ public final class VeilCommands {
 
     // Display geometry and every configured level transition for one anomaly.
     private static int info(CommandContext<CommandSourceStack> context) {
-        VeilAnomaly anomaly = require(context);
+        Restriction anomaly = require(context);
         if (anomaly == null) return 0;
         context.getSource().sendSuccess(() -> Component.literal("Veil anomaly " + anomaly.id())
                 .withStyle(ChatFormatting.DARK_PURPLE), false);
@@ -141,14 +141,14 @@ public final class VeilCommands {
         context.getSource().sendSuccess(() -> Component.literal("Boundary mode: "
                 + anomaly.boundaryMode().serializedName()).withStyle(ChatFormatting.GRAY), false);
         anomaly.states().forEach(state -> context.getSource().sendSuccess(() -> Component.literal("Level "
-                + state.minimumVeilLevel() + "+: " + state.collision().serializedName() + ", "
+                + state.minimumBoundaryLevel() + "+: " + state.collision().serializedName() + ", "
                 + state.visibility().serializedName() + ", blocks " + describeBlockInteraction(state))
                 .withStyle(ChatFormatting.GRAY), false));
         return 1;
     }
 
     // Create one anomaly centered at the command source with a solid opaque level-zero state.
-    private static int create(CommandContext<CommandSourceStack> context, VeilAnomaly.Shape shape) {
+    private static int create(CommandContext<CommandSourceStack> context, Restriction.Shape shape) {
         Identifier id = parseId(StringArgumentType.getString(context, "id"));
         Vec3 center = context.getSource().getPosition();
         double sizeX;
@@ -168,11 +168,11 @@ public final class VeilCommands {
             default -> throw new IllegalStateException("Unhandled anomaly shape " + shape);
         }
         try {
-            VeilAnomaly anomaly = new VeilAnomaly(id, context.getSource().getLevel().dimension().identifier(), shape,
+            Restriction anomaly = new Restriction(id, context.getSource().getLevel().dimension().identifier(), shape,
                     center.x, center.y, center.z, sizeX, sizeY, sizeZ,
                     KEEP_OUT,
-                    List.of(new VeilAnomaly.AnomalyState(0, SOLID, OPAQUE, AUTOMATIC)));
-            VeilAnomalyService.create(context.getSource().getServer(), anomaly);
+                    List.of(new Restriction.RestrictionState(0, SOLID, OPAQUE, AUTOMATIC)));
+            RestrictionService.create(context.getSource().getServer(), anomaly);
             context.getSource().sendSuccess(() -> Component.literal("Created " + shape.serializedName()
                     + " Veil anomaly " + id + " at the command position.").withStyle(ChatFormatting.GREEN), true);
             return 1;
@@ -184,12 +184,12 @@ public final class VeilCommands {
 
     // Change whether the solid boundary rejects entry or rejects escape.
     private static int setBoundaryMode(CommandContext<CommandSourceStack> context) {
-        VeilAnomaly anomaly = require(context);
+        Restriction anomaly = require(context);
         if (anomaly == null) return 0;
         try {
-            VeilAnomaly.BoundaryMode mode = VeilAnomaly.BoundaryMode.parse(
+            Restriction.BoundaryMode mode = Restriction.BoundaryMode.parse(
                     StringArgumentType.getString(context, "boundary_mode"));
-            VeilAnomalyService.update(context.getSource().getServer(), anomaly.withBoundaryMode(mode));
+            RestrictionService.update(context.getSource().getServer(), anomaly.withBoundaryMode(mode));
             context.getSource().sendSuccess(() -> Component.literal("Set " + anomaly.id()
                     + " boundary mode to " + mode.serializedName()).withStyle(ChatFormatting.GREEN), true);
             return 1;
@@ -202,7 +202,7 @@ public final class VeilCommands {
     // Remove one persistent anomaly and its runtime/client representations.
     private static int remove(CommandContext<CommandSourceStack> context) {
         Identifier id = parseId(StringArgumentType.getString(context, "id"));
-        if (!VeilAnomalyService.remove(context.getSource().getServer(), id)) {
+        if (!RestrictionService.remove(context.getSource().getServer(), id)) {
             context.getSource().sendFailure(Component.literal("Unknown anomaly: " + id));
             return 0;
         }
@@ -213,12 +213,12 @@ public final class VeilCommands {
 
     // Move one existing anomaly to the command source and its current dimension.
     private static int moveHere(CommandContext<CommandSourceStack> context) {
-        VeilAnomaly anomaly = require(context);
+        Restriction anomaly = require(context);
         if (anomaly == null) return 0;
-        VeilAnomaly moved = anomaly.movedTo(context.getSource().getLevel().dimension().identifier(),
+        Restriction moved = anomaly.movedTo(context.getSource().getLevel().dimension().identifier(),
                 context.getSource().getPosition());
         try {
-            VeilAnomalyService.update(context.getSource().getServer(), moved);
+            RestrictionService.update(context.getSource().getServer(), moved);
             context.getSource().sendSuccess(() -> Component.literal("Moved Veil anomaly " + anomaly.id())
                     .withStyle(ChatFormatting.GREEN), true);
             return 1;
@@ -231,7 +231,7 @@ public final class VeilCommands {
     // Parse an explicit block-interaction argument before inserting one complete state threshold.
     private static int setStateWithBlockInteraction(CommandContext<CommandSourceStack> context) {
         try {
-            return setState(context, VeilAnomaly.BlockInteraction.parse(
+            return setState(context, Restriction.BlockInteraction.parse(
                     StringArgumentType.getString(context, "block_interaction")));
         } catch (IllegalArgumentException exception) {
             context.getSource().sendFailure(Component.literal("Invalid block interaction: "
@@ -242,17 +242,17 @@ public final class VeilCommands {
 
     // Insert or replace one Veil-Level state threshold and immediately rebuild resolved indexes.
     private static int setState(CommandContext<CommandSourceStack> context,
-                                VeilAnomaly.BlockInteraction blockInteraction) {
-        VeilAnomaly anomaly = require(context);
+                                Restriction.BlockInteraction blockInteraction) {
+        Restriction anomaly = require(context);
         if (anomaly == null) return 0;
         try {
             int level = IntegerArgumentType.getInteger(context, "minimum_level");
-            VeilAnomaly.Collision collision = VeilAnomaly.Collision.parse(
+            Restriction.Collision collision = Restriction.Collision.parse(
                     StringArgumentType.getString(context, "collision"));
-            VeilAnomaly.Visibility visibility = VeilAnomaly.Visibility.parse(
+            Restriction.Visibility visibility = Restriction.Visibility.parse(
                     StringArgumentType.getString(context, "visibility"));
-            VeilAnomalyService.update(context.getSource().getServer(),
-                    anomaly.withState(new VeilAnomaly.AnomalyState(level, collision, visibility, blockInteraction)));
+            RestrictionService.update(context.getSource().getServer(),
+                    anomaly.withState(new Restriction.RestrictionState(level, collision, visibility, blockInteraction)));
             context.getSource().sendSuccess(() -> Component.literal("Set " + anomaly.id() + " at Veil Level "
                     + level + "+ to " + collision.serializedName() + ", " + visibility.serializedName()
                     + ", blocks " + blockInteraction.serializedName())
@@ -265,18 +265,18 @@ public final class VeilCommands {
     }
 
     // Describe automatic interaction behavior together with its effective resolved value.
-    private static String describeBlockInteraction(VeilAnomaly.AnomalyState state) {
+    private static String describeBlockInteraction(Restriction.RestrictionState state) {
         if (state.blockInteraction() != AUTOMATIC) return state.blockInteraction().serializedName();
         return "automatic (" + (state.protectsBlocks() ? "protected" : "allowed") + ")";
     }
 
     // Remove one nonzero state threshold and immediately restore inherited lower-level behavior.
     private static int removeState(CommandContext<CommandSourceStack> context) {
-        VeilAnomaly anomaly = require(context);
+        Restriction anomaly = require(context);
         if (anomaly == null) return 0;
         int level = IntegerArgumentType.getInteger(context, "minimum_level");
         try {
-            VeilAnomalyService.update(context.getSource().getServer(), anomaly.withoutState(level));
+            RestrictionService.update(context.getSource().getServer(), anomaly.withoutState(level));
             context.getSource().sendSuccess(() -> Component.literal("Removed the Veil Level " + level
                     + " state from " + anomaly.id()).withStyle(ChatFormatting.GREEN), true);
             return 1;
@@ -287,9 +287,9 @@ public final class VeilCommands {
     }
 
     // Resolve the command ID or send an unknown-anomaly error.
-    private static VeilAnomaly require(CommandContext<CommandSourceStack> context) {
+    private static Restriction require(CommandContext<CommandSourceStack> context) {
         Identifier id = parseId(StringArgumentType.getString(context, "id"));
-        VeilAnomaly anomaly = VeilAnomalyService.get(context.getSource().getServer(), id);
+        Restriction anomaly = RestrictionService.get(context.getSource().getServer(), id);
         if (anomaly == null) context.getSource().sendFailure(Component.literal("Unknown anomaly: " + id));
         return anomaly;
     }

@@ -5,10 +5,10 @@ import ekuzo.crazyworldprogression.admin.AdminPanelRegistry;
 import ekuzo.crazyworldprogression.currency.CurrencyRegistry;
 import ekuzo.crazyworldprogression.currency.CurrencyService;
 import ekuzo.echeloncore.EchelonCore;
-import ekuzo.echeloncore.king.KingService;
-import ekuzo.echeloncore.veil.VeilManager;
-import ekuzo.echeloncore.veil.anomaly.VeilAnomaly;
-import ekuzo.echeloncore.veil.anomaly.VeilAnomalyService;
+import ekuzo.crazyworldprogression.worldboundary.WorldLeaderService;
+import ekuzo.crazyworldprogression.worldboundary.AdvancedWorldBoundary;
+import ekuzo.crazyworldprogression.worldboundary.restriction.Restriction;
+import ekuzo.crazyworldprogression.worldboundary.restriction.RestrictionService;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -76,15 +76,15 @@ public final class EchelonAdminModule {
     // Summarize the major Echelon systems without mixing their management controls together.
     private static AdminPanelRegistry.AdminPage overviewPage(ServerPlayer player) {
         MinecraftServer server = player.level().getServer();
-        Optional<UUID> king = KingService.getKing(server);
+        Optional<UUID> king = WorldLeaderService.getLeader(server);
         List<AdminPanelRegistry.AdminEntry> entries = List.of(
                 new AdminPanelRegistry.AdminEntry("The Crown", king.map(id -> kingName(server, id))
                         .orElse("No king is appointed"), king.isPresent() ? GOOD : NORMAL, List.of()),
-                new AdminPanelRegistry.AdminEntry("Veil Level", Integer.toString(VeilManager.getVeilLevel(server)),
+                new AdminPanelRegistry.AdminEntry("Veil Level", Integer.toString(AdvancedWorldBoundary.getLevel(server)),
                         GOOD, List.of()),
                 AdminPanelRegistry.AdminEntry.info("Veil anomalies",
-                        VeilAnomalyService.anomalies(server).size() + " placed · "
-                                + VeilAnomalyService.solidAnomalyCount(server) + " currently solid"),
+                        RestrictionService.restrictions(server).size() + " placed · "
+                                + RestrictionService.solidRestrictionCount(server) + " currently solid"),
                 AdminPanelRegistry.AdminEntry.info("Echelon currencies",
                         CurrencyRegistry.values().stream().filter(currency ->
                                 currency.id().getNamespace().equals(EchelonCore.MOD_ID)).count() + " registered"),
@@ -97,7 +97,7 @@ public final class EchelonAdminModule {
     /** Kingdom: the king (search to appoint, clear to change) and the Veil level and radii. */
     private static AdminPanelRegistry.AdminPage kingdomPage(ServerPlayer player) {
         MinecraftServer server = player.level().getServer();
-        Optional<UUID> king = KingService.getKing(server);
+        Optional<UUID> king = WorldLeaderService.getLeader(server);
         List<AdminPanelRegistry.AdminEntry> entries = new ArrayList<>();
         if (king.isPresent()) {
             entries.add(AdminPanelRegistry.AdminEntry.editor("King", "👑 " + kingName(server, king.get()),
@@ -110,11 +110,11 @@ public final class EchelonAdminModule {
                                     .sorted(String.CASE_INSENSITIVE_ORDER).toList())),
                     List.of(new AdminPanelRegistry.AdminAction("king.appoint", "Appoint", true))));
         }
-        int level = VeilManager.getVeilLevel(server);
+        int level = AdvancedWorldBoundary.getLevel(server);
         entries.add(AdminPanelRegistry.AdminEntry.editor("Veil", "Veil level " + level,
                 "Comes from global skill-tree effects; it is not set here.", List.of(),
                 List.of(new AdminPanelRegistry.AdminAction("veil.refresh", "Recalculate", false))));
-        VeilManager.Radii current = VeilManager.getRadii(server, player.level().dimension().identifier(), level);
+        AdvancedWorldBoundary.Radii current = AdvancedWorldBoundary.getRadii(server, player.level().dimension().identifier(), level);
         entries.add(AdminPanelRegistry.AdminEntry.editor("Veil radii", "Add a radius",
                 "Inner and outer boundary for one world at one Veil level. Saving an existing world and level replaces it.",
                 List.of(new AdminPanelRegistry.AdminField("veil_dimension", "World", "minecraft:overworld",
@@ -126,7 +126,7 @@ public final class EchelonAdminModule {
                         new AdminPanelRegistry.AdminField("veil_outer", "Outer radius", "1200",
                                 current == null ? "1200" : Double.toString(current.outer()), 12, List.of())),
                 List.of(new AdminPanelRegistry.AdminAction("veil.set_radii", "Add", false))));
-        var radii = VeilManager.configuredRadii(server);
+        var radii = AdvancedWorldBoundary.configuredRadii(server);
         if (radii.isEmpty()) entries.add(AdminPanelRegistry.AdminEntry.editor("Veil radii", "No radii",
                 "Without a radius a world has no Veil.", List.of(), List.of()));
         radii.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry -> entries.add(
@@ -134,37 +134,40 @@ public final class EchelonAdminModule {
                         "inner " + entry.getValue().inner() + " · outer " + entry.getValue().outer(), List.of(),
                         List.of(new AdminPanelRegistry.AdminAction("veil.remove_radii|" + entry.getKey(), "Delete", true)))));
         entries.add(AdminPanelRegistry.AdminEntry.editor("Veil", "Anomalies with collision",
-                VeilAnomalyService.solidAnomalyCount(server) + " push players out right now", List.of(), List.of()));
-        return new AdminPanelRegistry.AdminPage(KINGDOM, "Kingdom", "King and the Veil", TABS, entries,
+                RestrictionService.solidRestrictionCount(server) + " push players out right now", List.of(), List.of()));
+        // CWP's divine fields: the kingdom's safe havens.
+        entries.addAll(ekuzo.crazyworldprogression.admin.AdminBonusAreaEditor.entries(player,
+                "Kingdom areas", "Kingdom area level"));
+        return new AdminPanelRegistry.AdminPage(KINGDOM, "Kingdom", "King, the Veil and Kingdom areas", TABS, entries,
                 AdminPanelRegistry.PageLayout.EDITOR);
     }
 
     // List every placed anomaly, its current state, and a confirmed removal control.
     private static AdminPanelRegistry.AdminPage anomaliesPage(ServerPlayer player) {
         MinecraftServer server = player.level().getServer();
-        int veilLevel = VeilManager.getVeilLevel(server);
+        int veilLevel = AdvancedWorldBoundary.getLevel(server);
         List<AdminPanelRegistry.AdminEntry> entries = new ArrayList<>();
         entries.add(section("Create", new AdminPanelRegistry.AdminEntry("Create anomaly", "Place a persistent Veil anomaly.", GOOD,
                 List.of(), List.of(AdminPanelRegistry.AdminAction.navigate("Create", ANOMALY_NEW)), null)));
         List<AdminPanelRegistry.AdminEntry> active = new ArrayList<>();
         Map<String, AdminPanelRegistry.AdminEntry> all = new java.util.LinkedHashMap<>();
-        for (VeilAnomaly anomaly : VeilAnomalyService.anomalies(server)) {
-            VeilAnomaly.AnomalyState state = anomaly.stateAt(veilLevel);
+        for (Restriction anomaly : RestrictionService.restrictions(server)) {
+            Restriction.RestrictionState state = anomaly.stateAt(veilLevel);
             AdminPanelRegistry.AdminEntry entry = new AdminPanelRegistry.AdminEntry(anomaly.id().toString(),
                     anomaly.shape().serializedName() + " · " + anomaly.boundaryMode().serializedName() + " · "
                             + state.collision().serializedName() + "/" + state.visibility().serializedName()
-                            + " · " + anomaly.dimension(), state.collision() == VeilAnomaly.Collision.SOLID
+                            + " · " + anomaly.dimension(), state.collision() == Restriction.Collision.SOLID
                     ? DANGER : NORMAL, List.of(),
                     List.of(AdminPanelRegistry.AdminAction.navigate("Edit", ANOMALY_EDIT + anomaly.id()),
                             new AdminPanelRegistry.AdminAction("anomaly.remove|" + anomaly.id(), "Delete", true)), null);
-            if (state.collision() == VeilAnomaly.Collision.SOLID || state.visibility() != VeilAnomaly.Visibility.HIDDEN)
+            if (state.collision() == Restriction.Collision.SOLID || state.visibility() != Restriction.Visibility.HIDDEN)
                 active.add(section("Active at Veil level " + veilLevel, entry));
             all.put(anomaly.id().toString(), entry);
         }
         entries.addAll(active);
         entries.addAll(AdminCategories.sectioned(server, "anomaly", "All anomalies", all, ANOMALIES));
         return new AdminPanelRegistry.AdminPage(ANOMALIES, "Veil anomalies",
-                VeilAnomalyService.anomalies(server).size() + " persistent definition(s)", TABS, entries,
+                RestrictionService.restrictions(server).size() + " persistent definition(s)", TABS, entries,
                 AdminPanelRegistry.PageLayout.PREVIEW_CARDS);
     }
 
@@ -190,7 +193,7 @@ public final class EchelonAdminModule {
     }
 
     private static AdminPanelRegistry.AdminPage anomalyEditorPage(ServerPlayer player, Identifier id) {
-        VeilAnomaly anomaly = VeilAnomalyService.get(player.level().getServer(), id);
+        Restriction anomaly = RestrictionService.get(player.level().getServer(), id);
         if (anomaly == null) throw new IllegalArgumentException("Unknown anomaly: " + id);
         List<AdminPanelRegistry.AdminEntry> rows = new ArrayList<>();
         rows.add(editor("Identity", "Anomaly", "ID cannot change after creation.",
@@ -210,11 +213,11 @@ public final class EchelonAdminModule {
                         select("boundary", "Boundary", anomaly.boundaryMode().serializedName(),
                                 List.of("keep_out", "keep_in"))), List.of()));
         for (int i = 0; i < anomaly.states().size(); i++) {
-            VeilAnomaly.AnomalyState state = anomaly.states().get(i);
+            Restriction.RestrictionState state = anomaly.states().get(i);
             String prefix = "state_" + i + "_";
-            rows.add(editor("Veil states", "Level " + state.minimumVeilLevel(),
+            rows.add(editor("Veil states", "Level " + state.minimumBoundaryLevel(),
                     "The highest matching threshold controls this anomaly.",
-                    List.of(text(prefix + "level", "Minimum level", Integer.toString(state.minimumVeilLevel()), 10),
+                    List.of(text(prefix + "level", "Minimum level", Integer.toString(state.minimumBoundaryLevel()), 10),
                             select(prefix + "collision", "Collision", state.collision().serializedName(),
                                     List.of("solid", "passable")),
                             select(prefix + "visibility", "Visibility", state.visibility().serializedName(),
@@ -222,7 +225,7 @@ public final class EchelonAdminModule {
                             select(prefix + "blocks", "Block interaction", state.blockInteraction().serializedName(),
                                     List.of("automatic", "protected", "allowed"))),
                     i == 0 ? List.of() : List.of(new AdminPanelRegistry.AdminAction(
-                            "anomaly.state.remove|" + state.minimumVeilLevel(), "Remove", true))));
+                            "anomaly.state.remove|" + state.minimumBoundaryLevel(), "Remove", true))));
         }
         rows.add(editor("Veil states", "Add level", "Add a new threshold with its own collision and appearance.",
                 List.of(text("new_state_level", "Minimum level", "1", 10),
@@ -273,30 +276,32 @@ public final class EchelonAdminModule {
                                                           Map<String, String> values) {
         MinecraftServer server = player.level().getServer();
         if (AdminCategories.owns(pageId)) return AdminCategories.action(player, pageId, actionId, values);
+        if (ekuzo.crazyworldprogression.admin.AdminBonusAreaEditor.handles(actionId))
+            return ekuzo.crazyworldprogression.admin.AdminBonusAreaEditor.action(player, actionId, values);
         if (actionId.equals("king.appoint")) {
             String name = values.getOrDefault("king_name", "").trim();
             ServerPlayer candidate = server.getPlayerList().getPlayerByName(name);
             if (candidate == null) return AdminPanelRegistry.ActionResult.failure("No online player named " + name);
-            KingService.setKing(server, candidate.getUUID());
+            WorldLeaderService.setLeader(server, candidate.getUUID());
             return AdminPanelRegistry.ActionResult.success("Appointed " + candidate.getGameProfile().name() + " as king");
         }
         if (actionId.equals("anomaly.create")) {
             Identifier id = Identifier.parse(values.get("anomaly_id").trim());
-            VeilAnomaly anomaly = new VeilAnomaly(id, Identifier.parse(values.get("dimension").trim()),
-                    VeilAnomaly.Shape.parse(values.get("shape")), number(values, "center_x"),
+            Restriction anomaly = new Restriction(id, Identifier.parse(values.get("dimension").trim()),
+                    Restriction.Shape.parse(values.get("shape")), number(values, "center_x"),
                     number(values, "center_y"), number(values, "center_z"), number(values, "size_x"),
-                    number(values, "size_y"), number(values, "size_z"), VeilAnomaly.BoundaryMode.KEEP_OUT,
-                    List.of(new VeilAnomaly.AnomalyState(0, VeilAnomaly.Collision.SOLID,
-                            VeilAnomaly.Visibility.OPAQUE, VeilAnomaly.BlockInteraction.AUTOMATIC)));
-            VeilAnomalyService.create(server, anomaly);
+                    number(values, "size_y"), number(values, "size_z"), Restriction.BoundaryMode.KEEP_OUT,
+                    List.of(new Restriction.RestrictionState(0, Restriction.Collision.SOLID,
+                            Restriction.Visibility.OPAQUE, Restriction.BlockInteraction.AUTOMATIC)));
+            RestrictionService.create(server, anomaly);
             return AdminPanelRegistry.ActionResult.success("Created anomaly " + id, ANOMALY_EDIT + id);
         }
         if (pageId.startsWith(ANOMALY_EDIT)) {
             Identifier id = Identifier.parse(pageId.substring(ANOMALY_EDIT.length()));
-            VeilAnomaly current = VeilAnomalyService.get(server, id);
+            Restriction current = RestrictionService.get(server, id);
             if (current == null) return AdminPanelRegistry.ActionResult.failure("Unknown anomaly " + id);
             if (actionId.equals("anomaly.delete")) {
-                VeilAnomalyService.remove(server, id);
+                RestrictionService.remove(server, id);
                 return AdminPanelRegistry.ActionResult.success("Deleted anomaly " + id, ANOMALIES);
             }
             if (actionId.equals("anomaly.save") || actionId.equals("anomaly.here")
@@ -305,35 +310,35 @@ public final class EchelonAdminModule {
                 if (actionId.startsWith("anomaly.state.remove|")) {
                     int threshold = Integer.parseInt(actionId.substring(actionId.indexOf('|') + 1));
                     for (int i = 0; i < current.states().size(); i++) {
-                        if (current.states().get(i).minimumVeilLevel() == threshold) removeIndex = i;
+                        if (current.states().get(i).minimumBoundaryLevel() == threshold) removeIndex = i;
                     }
                     if (removeIndex <= 0) throw new IllegalArgumentException("Cannot remove this Veil state");
                 }
-                VeilAnomaly updated = editedAnomaly(current, values, removeIndex);
+                Restriction updated = editedAnomaly(current, values, removeIndex);
                 if (actionId.equals("anomaly.here")) {
                     updated = updated.movedTo(player.level().dimension().identifier(), new Vec3(
                             player.getX(), player.getY(), player.getZ()));
                 } else if (actionId.equals("anomaly.state.add")) {
                     int level = Integer.parseInt(values.get("new_state_level"));
-                    if (updated.states().stream().anyMatch(state -> state.minimumVeilLevel() == level)) {
+                    if (updated.states().stream().anyMatch(state -> state.minimumBoundaryLevel() == level)) {
                         throw new IllegalArgumentException("A Veil state already exists at level " + level);
                     }
-                    updated = updated.withState(new VeilAnomaly.AnomalyState(
+                    updated = updated.withState(new Restriction.RestrictionState(
                             level,
-                            VeilAnomaly.Collision.parse(values.get("new_state_collision")),
-                            VeilAnomaly.Visibility.parse(values.get("new_state_visibility")),
-                            VeilAnomaly.BlockInteraction.parse(values.get("new_state_blocks"))));
+                            Restriction.Collision.parse(values.get("new_state_collision")),
+                            Restriction.Visibility.parse(values.get("new_state_visibility")),
+                            Restriction.BlockInteraction.parse(values.get("new_state_blocks"))));
                 }
-                VeilAnomalyService.update(server, updated);
+                RestrictionService.update(server, updated);
                 return AdminPanelRegistry.ActionResult.success("Saved anomaly " + id);
             }
         }
         if (actionId.equals("king.clear")) {
-            KingService.clearKing(server);
+            WorldLeaderService.clearLeader(server);
             return AdminPanelRegistry.ActionResult.success("Cleared the Echelon crown");
         }
         if (actionId.equals("veil.refresh")) {
-            VeilAnomalyService.refreshVeilLevel(server);
+            RestrictionService.refreshLevel(server);
             return AdminPanelRegistry.ActionResult.success("Refreshed Veil anomaly runtime state");
         }
         if (actionId.equals("veil.set_radii")) {
@@ -341,14 +346,14 @@ public final class EchelonAdminModule {
             int level = Integer.parseInt(values.getOrDefault("veil_level", "").trim());
             double inner = Double.parseDouble(values.getOrDefault("veil_inner", "").trim());
             double outer = Double.parseDouble(values.getOrDefault("veil_outer", "").trim());
-            VeilManager.setRadii(server, dimension, level, inner, outer);
+            AdvancedWorldBoundary.setRadii(server, dimension, level, inner, outer);
             return AdminPanelRegistry.ActionResult.success("Saved Veil radii for " + dimension + " at level " + level);
         }
         String[] parts = actionId.split("\\|", -1);
         if (parts.length == 3 && parts[0].equals("veil.remove_radii")) {
             Identifier dimension = Identifier.parse(parts[1]);
             int level = Integer.parseInt(parts[2]);
-            return VeilManager.removeRadii(server, dimension, level)
+            return AdvancedWorldBoundary.removeRadii(server, dimension, level)
                     ? AdminPanelRegistry.ActionResult.success("Removed Veil radii for " + dimension + " at level " + level)
                     : AdminPanelRegistry.ActionResult.failure("No such Veil radius entry");
         }
@@ -357,36 +362,36 @@ public final class EchelonAdminModule {
             if (server.getPlayerList().getPlayer(king) == null) {
                 return AdminPanelRegistry.ActionResult.failure("That player is no longer online");
             }
-            KingService.setKing(server, king);
+            WorldLeaderService.setLeader(server, king);
             return AdminPanelRegistry.ActionResult.success("Appointed " + kingName(server, king) + " as king");
         }
         if (parts.length == 2 && parts[0].equals("anomaly.remove")) {
             Identifier id = Identifier.parse(parts[1]);
-            return VeilAnomalyService.remove(server, id)
+            return RestrictionService.remove(server, id)
                     ? AdminPanelRegistry.ActionResult.success("Removed anomaly " + id)
                     : AdminPanelRegistry.ActionResult.failure("Unknown anomaly " + id);
         }
         return AdminPanelRegistry.ActionResult.failure("Unknown Echelon admin action: " + actionId);
     }
 
-    private static VeilAnomaly editedAnomaly(VeilAnomaly current, Map<String, String> values, int removeIndex) {
-        List<VeilAnomaly.AnomalyState> states = new ArrayList<>();
+    private static Restriction editedAnomaly(Restriction current, Map<String, String> values, int removeIndex) {
+        List<Restriction.RestrictionState> states = new ArrayList<>();
         for (int i = 0; i < current.states().size(); i++) {
             if (i == removeIndex) continue;
-            VeilAnomaly.AnomalyState old = current.states().get(i);
+            Restriction.RestrictionState old = current.states().get(i);
             String prefix = "state_" + i + "_";
-            states.add(new VeilAnomaly.AnomalyState(
-                    Integer.parseInt(values.getOrDefault(prefix + "level", Integer.toString(old.minimumVeilLevel()))),
-                    VeilAnomaly.Collision.parse(values.getOrDefault(prefix + "collision", old.collision().serializedName())),
-                    VeilAnomaly.Visibility.parse(values.getOrDefault(prefix + "visibility", old.visibility().serializedName())),
-                    VeilAnomaly.BlockInteraction.parse(values.getOrDefault(prefix + "blocks", old.blockInteraction().serializedName()))));
+            states.add(new Restriction.RestrictionState(
+                    Integer.parseInt(values.getOrDefault(prefix + "level", Integer.toString(old.minimumBoundaryLevel()))),
+                    Restriction.Collision.parse(values.getOrDefault(prefix + "collision", old.collision().serializedName())),
+                    Restriction.Visibility.parse(values.getOrDefault(prefix + "visibility", old.visibility().serializedName())),
+                    Restriction.BlockInteraction.parse(values.getOrDefault(prefix + "blocks", old.blockInteraction().serializedName()))));
         }
-        return new VeilAnomaly(current.id(), Identifier.parse(values.getOrDefault("dimension",
-                current.dimension().toString()).trim()), VeilAnomaly.Shape.parse(values.getOrDefault("shape",
+        return new Restriction(current.id(), Identifier.parse(values.getOrDefault("dimension",
+                current.dimension().toString()).trim()), Restriction.Shape.parse(values.getOrDefault("shape",
                 current.shape().serializedName())), number(values, "center_x", current.centerX()),
                 number(values, "center_y", current.centerY()), number(values, "center_z", current.centerZ()),
                 number(values, "size_x", current.sizeX()), number(values, "size_y", current.sizeY()),
-                number(values, "size_z", current.sizeZ()), VeilAnomaly.BoundaryMode.parse(
+                number(values, "size_z", current.sizeZ()), Restriction.BoundaryMode.parse(
                 values.getOrDefault("boundary", current.boundaryMode().serializedName())), states);
     }
 

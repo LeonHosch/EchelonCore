@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "echelon-core:pathfinder_helmet",
+    "echelon-core:guardian_of_life_helmet",
+    "echelon-core:sage_helmet",
+    "echelon-core:icarus_folly_helmet",
+    "echelon-core:bloodletters_pact_helmet",
+    "echelon-core:stormcaller_helmet"
+  ]
+}
