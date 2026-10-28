@@ -18,6 +18,8 @@ public final class EchelonCoreClient implements ClientModInitializer {
         // CWP's reforge window, styled as Echelon's Soulforging.
         ekuzo.crazyworldprogression.client.reforge.ReforgeScreenStyle.set(new SoulforgingStyle());
         ekuzo.crazyworldprogression.client.style.PanelStyle.set(new MedievalPanelStyle());
+        ekuzo.crazyworldprogression.client.CwpClientSettings.setMenuTitle(
+                net.minecraft.network.chat.Component.translatable("menu.echelon-core.settings"));
         // Maps (CWP's optional JourneyMap integration): nothing beyond the Veil border can be seen on the map.
         ekuzo.crazyworldprogression.client.map.MapData.setFogProvider(dimension -> {
             var radii = ekuzo.crazyworldprogression.worldboundary.ClientBoundaryRadii.get(dimension.identifier());

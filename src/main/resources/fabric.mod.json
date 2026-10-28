@@ -20,6 +20,12 @@
     "java": ">=25",
     "fabric-api": "*",
     "geckolib": ">=5.5.5",
-    "crazy-world-progression": ">=1.1.0"
+    "crazy-world-progression": ">=0.5.0"
+  },
+  "custom": {
+    "crazy-world-progression": {
+      "requires_modules": ["mobforge", "world_boundary", "currency", "collectibles", "fletching", "reforge",
+        "equipment", "skill_trees", "random_events", "divine_protection", "accessories"]
+    }
   }
 }

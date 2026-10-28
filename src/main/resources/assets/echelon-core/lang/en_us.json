@@ -1,4 +1,5 @@
 {
+  "menu.echelon-core.settings": "Echelon Settings",
   "stat.echelon-core.veil_level": "Veil Level",
   "advancement.echelon-core.mining.root.title": "Breaking Ground",
   "advancement.echelon-core.mining.root.description": "Mine your first block of stone.",

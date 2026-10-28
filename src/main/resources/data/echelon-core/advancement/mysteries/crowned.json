@@ -9,7 +9,7 @@
     "announce_to_chat": true
   },
   "sends_telemetry_event": false,
-  "echelon_title": {
+  "cwp_title": {
     "id": "echelon-core:crowned",
     "name": "The Crowned",
     "color": "#FFD700"
