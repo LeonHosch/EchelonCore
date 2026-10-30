@@ -97,6 +97,7 @@ public final class VeilCommands {
         return Commands.argument("id", StringArgumentType.word())
                 .suggests((context, builder) -> SharedSuggestionProvider.suggest(
                         RestrictionService.restrictions(context.getSource().getServer()).stream()
+                                .filter(anomaly -> !ekuzo.echeloncore.encounter.BossEncounters.ownsAnomaly(anomaly.id()))
                                 .map(anomaly -> anomaly.id().toString()).toList(), builder));
     }
 
@@ -112,7 +113,9 @@ public final class VeilCommands {
 
     // List all placed anomalies with resolved state at the current Veil Level.
     private static int list(CommandContext<CommandSourceStack> context) {
-        List<Restriction> anomalies = RestrictionService.restrictions(context.getSource().getServer());
+        // Boss encounter areas are managed with /encounter.
+        List<Restriction> anomalies = RestrictionService.restrictions(context.getSource().getServer()).stream()
+                .filter(anomaly -> !ekuzo.echeloncore.encounter.BossEncounters.ownsAnomaly(anomaly.id())).toList();
         int level = AdvancedWorldBoundary.getLevel(context.getSource().getServer());
         context.getSource().sendSuccess(() -> Component.literal("Veil anomalies (" + anomalies.size() + ")")
                 .withStyle(ChatFormatting.DARK_PURPLE), false);
@@ -291,6 +294,11 @@ public final class VeilCommands {
         Identifier id = parseId(StringArgumentType.getString(context, "id"));
         Restriction anomaly = RestrictionService.get(context.getSource().getServer(), id);
         if (anomaly == null) context.getSource().sendFailure(Component.literal("Unknown anomaly: " + id));
+        // Boss encounter areas are managed with /encounter.
+        else if (ekuzo.echeloncore.encounter.BossEncounters.ownsAnomaly(id)) {
+            context.getSource().sendFailure(Component.literal(id + " is a boss encounter's area: change it with /encounter"));
+            return null;
+        }
         return anomaly;
     }
 

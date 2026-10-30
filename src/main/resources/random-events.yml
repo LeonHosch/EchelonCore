@@ -2,7 +2,7 @@
 # Times in this file default to Europe/Berlin and automatically follow daylight-saving changes.
 timezone: Europe/Berlin
 
-# Random rolls are suppressed from Friday 19:00 until Saturday 00:00 local time.
+# Random rolls are suppressed from Friday 12:00 until Saturday 00:00 local time.
 # Events that were already active continue until their configured duration ends.
 blackout_windows:
   - weekdays:
@@ -10,5 +10,16 @@ blackout_windows:
     start: "12:00"
     end: "00:00"
 
-# Blood Moon, Rift, and other concrete events will be added here when their gameplay is implemented.
-events: []
+events:
+  # A meteorite falls somewhere in the overworld (away from anomalies, kingdom areas, portals and the Veil).
+  # Its guards, heat, shockwaves, reward and 30 minute burn-out are the MobForge script fallen_star
+  # (config/mobforge/scripts/fallen_star.mfs). One roll every 45 minutes with a 25% chance.
+  - id: fallen_star
+    trigger:
+      type: real_time
+      interval_seconds: 2700
+      chance: 0.25
+    # A safety net only: the script ends the event itself after at most 30 minutes.
+    duration:
+      clock: real_time
+      seconds: 1920

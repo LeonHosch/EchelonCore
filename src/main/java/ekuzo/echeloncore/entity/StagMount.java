@@ -3,7 +3,6 @@ package ekuzo.echeloncore.entity;
 import com.geckolib.animatable.GeoEntity;
 import com.geckolib.animatable.instance.AnimatableInstanceCache;
 import com.geckolib.animatable.manager.AnimatableManager;
-import com.geckolib.constant.DefaultAnimations;
 import com.geckolib.util.GeckoLibUtil;
 import ekuzo.crazyworldprogression.collectibles.CwpMount;
 import net.minecraft.world.entity.EntityType;
@@ -19,7 +18,7 @@ public class StagMount extends CwpMount implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(DefaultAnimations.genericWalkIdleController());
+        controllers.add(MountAnimations.controller());
     }
 
     @Override

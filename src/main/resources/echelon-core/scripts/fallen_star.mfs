@@ -1,0 +1,72 @@
+script fallen_star
+
+# The Fallen Star event (Echelon). Positions are relative to the meteorite's center (0,0,0): Echelon moves the whole
+# script to wherever the star fell. The event ends when the core's ancient debris is mined out (everyone still taking
+# part gets the fallen_star loot pool; the debris itself drops for whoever mines it) or after 30 minutes (the star
+# burns out: no loot, the debris left turns to stone). Guards keep coming the whole time and go after whoever is at
+# the core first.
+
+area(name="star", center={"x":0,"y":0,"z":0}, radius=40, height=24, grace="20s", player_variable="present", count_variable="taking_part", defend_radius=7)
+eventbox(name="core", min={"x":-2,"y":-2,"z":-2}, max={"x":2,"y":2,"z":2})
+aura(name="heat", effect_id="echelon-core:unbearable_heat", center={"x":0,"y":0,"z":0}, radius=9, interval="2s", max_stacks=5, duration="3s")
+sound(sound_id="minecraft:entity.generic.explode", location={"x":0,"y":0,"z":0})
+particles(particle_id="minecraft:large_smoke", location={"x":0,"y":2,"z":0}, offset={"x":3,"y":2,"z":3}, count=80, speed=0.05)
+
+# Guards: at most 8 alive, 3 more for every player in the area beyond the second, never more than 20. A new wave every
+# 25 seconds tops them up (a wave stops early once the cap is reached).
+mob_spawn(mob_id="minecraft:zombie", location={"x":13,"y":0,"z":0}, offset={"x":3,"y":0,"z":3}, count=3, per_player=2, max=9, area="star", health=2, damage=1.5, fireproof=true, cap=8, cap_per_player=3, cap_after=2, cap_max=20, tag="guards")
+mob_spawn(mob_id="echelon-core:void_wraith", location={"x":-13,"y":3,"z":0}, offset={"x":2,"y":0,"z":2}, count=1, per_player=1, max=4, area="star", cap=8, cap_per_player=3, cap_after=2, cap_max=20, tag="guards")
+variable(name="wave_timer", operation="set", value="0")
+variable(name="pulse_timer", operation="set", value="0")
+variable(name="pulse_kind", operation="set", value="0")
+
+while blocks("core", "minecraft:ancient_debris") > 0 and elapsed() < 1800, max_iterations=100000:
+    variable(name="wave_timer", operation="increment", value="1")
+    variable(name="pulse_timer", operation="increment", value="1")
+    if var("wave_timer") >= 500:
+        variable(name="wave_timer", operation="set", value="0")
+        message(text="More creatures crawl out of the fallen star!", player="present", style="actionbar", color="dark_purple")
+        mob_spawn(mob_id="echelon-core:void_wraith", location={"x":-13,"y":3,"z":0}, offset={"x":2,"y":0,"z":2}, count=1, per_player=1, max=4, area="star", cap=8, cap_per_player=3, cap_after=2, cap_max=20, tag="guards")
+        mob_spawn(mob_id="minecraft:blaze", location={"x":0,"y":3,"z":13}, offset={"x":3,"y":1,"z":3}, count=1, per_player=1, max=4, area="star", health=1.5, cap=8, cap_per_player=3, cap_after=2, cap_max=20, tag="guards")
+        mob_spawn(mob_id="minecraft:witch", location={"x":0,"y":0,"z":-13}, offset={"x":3,"y":0,"z":3}, count=1, per_player=1, max=3, area="star", health=1.5, cap=8, cap_per_player=3, cap_after=2, cap_max=20, tag="guards")
+        mob_spawn(mob_id="minecraft:zombie", location={"x":13,"y":0,"z":0}, offset={"x":3,"y":0,"z":3}, count=3, per_player=2, max=9, area="star", health=2, damage=1.5, fireproof=true, cap=8, cap_per_player=3, cap_after=2, cap_max=20, tag="guards")
+    if var("pulse_timer") >= 500:
+        variable(name="pulse_timer", operation="set", value="0")
+        if var("pulse_kind") == 0:
+            variable(name="pulse_kind", operation="set", value="1")
+            message(text="The fallen star gathers dark energy! Get away from it!", player="present", style="title", color="dark_purple")
+            sound(sound_id="minecraft:entity.warden.sonic_charge", location={"x":0,"y":0,"z":0})
+            particles(particle_id="minecraft:reverse_portal", location={"x":0,"y":1,"z":0}, offset={"x":2,"y":2,"z":2}, count=120, speed=0.4)
+            wait(duration="1s")
+            particles(particle_id="minecraft:squid_ink", location={"x":0,"y":1,"z":0}, offset={"x":2,"y":1,"z":2}, count=60, speed=0.1)
+            wait(duration="1s")
+            particles(particle_id="minecraft:reverse_portal", location={"x":0,"y":1,"z":0}, offset={"x":1,"y":1,"z":1}, count=200, speed=0.8)
+            wait(duration="1s")
+            sound(sound_id="minecraft:entity.warden.sonic_boom", location={"x":0,"y":0,"z":0})
+            particles(particle_id="minecraft:sonic_boom", location={"x":0,"y":1,"z":0}, offset={"x":5,"y":1,"z":5}, count=20, speed=0)
+            particles(particle_id="minecraft:squid_ink", location={"x":0,"y":1,"z":0}, offset={"x":7,"y":1,"z":7}, count=150, speed=0.3)
+            explosion(location={"x":0,"y":1,"z":0}, power=5)
+        else:
+            variable(name="pulse_kind", operation="set", value="0")
+            message(text="The fallen star is about to erupt in flames! Get away from it!", player="present", style="title", color="gold")
+            sound(sound_id="minecraft:block.fire.ambient", location={"x":0,"y":0,"z":0})
+            particles(particle_id="minecraft:flame", location={"x":0,"y":1,"z":0}, offset={"x":2,"y":2,"z":2}, count=80, speed=0.05)
+            wait(duration="1s")
+            particles(particle_id="minecraft:lava", location={"x":0,"y":1,"z":0}, offset={"x":2,"y":1,"z":2}, count=30, speed=0.1)
+            wait(duration="1s")
+            particles(particle_id="minecraft:flame", location={"x":0,"y":1,"z":0}, offset={"x":1,"y":1,"z":1}, count=200, speed=0.2)
+            wait(duration="1s")
+            sound(sound_id="minecraft:entity.blaze.shoot", location={"x":0,"y":0,"z":0})
+            particles(particle_id="minecraft:flame", location={"x":0,"y":1,"z":0}, offset={"x":7,"y":1,"z":7}, count=300, speed=0.15)
+            particles(particle_id="minecraft:lava", location={"x":0,"y":1,"z":0}, offset={"x":6,"y":1,"z":6}, count=60, speed=0.2)
+            explosion(location={"x":0,"y":1,"z":0}, power=5)
+
+aura(name="heat", action="remove")
+if blocks("core", "minecraft:ancient_debris") == 0:
+    message(text="The fallen star has been harvested!", player="present", style="title", color="gold")
+    loot(lootpool_id="echelon-core:fallen_star", player="present")
+else:
+    message(text="The fallen star burned out.", player="present", style="title", color="red")
+    replace_blocks(from="minecraft:ancient_debris", to="minecraft:cobblestone", area="core")
+mob_despawn(mob="guards")
+trigger(event="echelon-core:fallen_star_over")

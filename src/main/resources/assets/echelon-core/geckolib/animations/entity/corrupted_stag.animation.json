@@ -265,6 +265,89 @@
      }
     }
    }
+  },
+  "move.jump": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "leftFrontLeg": {
+     "rotation": [
+      "-48",
+      "0",
+      "0"
+     ]
+    },
+    "rightFrontLeg": {
+     "rotation": [
+      "-42",
+      "0",
+      "0"
+     ]
+    },
+    "leftFrontShin": {
+     "rotation": [
+      "78",
+      "0",
+      "0"
+     ]
+    },
+    "rightFrontShin": {
+     "rotation": [
+      "72",
+      "0",
+      "0"
+     ]
+    },
+    "leftHindLeg": {
+     "rotation": [
+      "38",
+      "0",
+      "0"
+     ]
+    },
+    "rightHindLeg": {
+     "rotation": [
+      "34",
+      "0",
+      "0"
+     ]
+    },
+    "leftHindShin": {
+     "rotation": [
+      "-18",
+      "0",
+      "0"
+     ]
+    },
+    "rightHindShin": {
+     "rotation": [
+      "-14",
+      "0",
+      "0"
+     ]
+    },
+    "neck": {
+     "rotation": [
+      "8",
+      "0",
+      "0"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "-14",
+      "0",
+      "0"
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "38 + math.sin(query.anim_time * 360) * 6",
+      "0",
+      "0"
+     ]
+    }
+   }
   }
  }
 }

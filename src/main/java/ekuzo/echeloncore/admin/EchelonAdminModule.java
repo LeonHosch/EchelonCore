@@ -36,6 +36,7 @@ public final class EchelonAdminModule {
     private static final List<AdminPanelRegistry.AdminTab> TABS = List.of(
             new AdminPanelRegistry.AdminTab(KINGDOM, "Kingdom", AdminPanelRegistry.MODERATE),
             new AdminPanelRegistry.AdminTab(ANOMALIES, "Anomalies", AdminPanelRegistry.BUILD),
+            new AdminPanelRegistry.AdminTab(ekuzo.echeloncore.encounter.BossEncounterAdmin.PAGE, "Boss Encounters", AdminPanelRegistry.BUILD),
             new AdminPanelRegistry.AdminTab(ADVANCEMENTS, "Advancements", AdminPanelRegistry.LOGS),
             new AdminPanelRegistry.AdminTab(OVERVIEW, "Echelon status", AdminPanelRegistry.LOGS));
 
@@ -60,6 +61,7 @@ public final class EchelonAdminModule {
     // Route a requested Echelon tab to freshly calculated server state.
     private static AdminPanelRegistry.AdminPage page(ServerPlayer player, String pageId) {
         if (AdminCategories.owns(pageId)) return AdminCategories.page(player, pageId, TABS);
+        if (ekuzo.echeloncore.encounter.BossEncounterAdmin.owns(pageId)) return ekuzo.echeloncore.encounter.BossEncounterAdmin.page(player, pageId, TABS);
         if (pageId.equals(ANOMALY_NEW)) return newAnomalyPage(player);
         if (pageId.startsWith(ANOMALY_EDIT)) {
             return anomalyEditorPage(player, Identifier.parse(pageId.substring(ANOMALY_EDIT.length())));
@@ -152,6 +154,8 @@ public final class EchelonAdminModule {
         List<AdminPanelRegistry.AdminEntry> active = new ArrayList<>();
         Map<String, AdminPanelRegistry.AdminEntry> all = new java.util.LinkedHashMap<>();
         for (Restriction anomaly : RestrictionService.restrictions(server)) {
+            // Boss encounter areas are managed on the Boss Encounters tab.
+            if (ekuzo.echeloncore.encounter.BossEncounters.ownsAnomaly(anomaly.id())) continue;
             Restriction.RestrictionState state = anomaly.stateAt(veilLevel);
             AdminPanelRegistry.AdminEntry entry = new AdminPanelRegistry.AdminEntry(anomaly.id().toString(),
                     anomaly.shape().serializedName() + " · " + anomaly.boundaryMode().serializedName() + " · "
@@ -276,6 +280,7 @@ public final class EchelonAdminModule {
                                                           Map<String, String> values) {
         MinecraftServer server = player.level().getServer();
         if (AdminCategories.owns(pageId)) return AdminCategories.action(player, pageId, actionId, values);
+        if (ekuzo.echeloncore.encounter.BossEncounterAdmin.owns(pageId)) return ekuzo.echeloncore.encounter.BossEncounterAdmin.action(player, pageId, actionId, values);
         if (ekuzo.crazyworldprogression.admin.AdminBonusAreaEditor.handles(actionId))
             return ekuzo.crazyworldprogression.admin.AdminBonusAreaEditor.action(player, actionId, values);
         if (actionId.equals("king.appoint")) {

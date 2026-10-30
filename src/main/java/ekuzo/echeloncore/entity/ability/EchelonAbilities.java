@@ -31,6 +31,12 @@ public final class EchelonAbilities {
         MobForgeApi.abilities().register(TongueLash.ID, TongueLash::new);
         MobForgeApi.abilities().register(Flay.ID, Flay::new);
         MobForgeApi.abilities().register(MassDecoyAbility.ID, MassDecoyAbility::new);
+        Interrupt.initialize();
+        MobForgeApi.abilities().register(GriefRend.ID, GriefRend::new);
+        MobForgeApi.abilities().register(MouthlessWail.ID, MouthlessWail::new);
+        MobForgeApi.abilities().register(TearlessMourning.ID, TearlessMourning::new);
+        MobForgeApi.abilities().register(VoidLunge.ID, VoidLunge::new);
+        MobForgeApi.abilities().register(GraspOfTheLost.ID, GraspOfTheLost::new);
         // Default abilities, used on its own in combat (Ground Slam when a target is within reach, and also right
         // after some Shadow Steps); Summon Wolves the Leshen uses through its second phase.
         MobForgeApi.mobs().register(MobDefinition.builder(EchelonCore.id("leshen"), EchelonEntities.LESHEN)
@@ -40,5 +46,9 @@ public final class EchelonAbilities {
         MobForgeApi.mobs().register(MobDefinition.builder(EchelonCore.id("falsekin"), EchelonEntities.FALSEKIN)
                 .displayName("Falsekin").ability(SkinShed.ID).ability(StolenVoice.ID).ability(TongueLash.ID).ability(MassDecoyAbility.ID)
                 .ability(Flay.ID).build());
+        // The Hollowed Penitent's passives (Weeping Void, the phases, Last Sorrow) are its own, see HollowedPenitent.
+        MobForgeApi.mobs().register(MobDefinition.builder(EchelonCore.id("hollowed_penitent"), EchelonEntities.HOLLOWED_PENITENT)
+                .displayName("The Hollowed Penitent").ability(GriefRend.ID).ability(MouthlessWail.ID).ability(TearlessMourning.ID)
+                .ability(VoidLunge.ID).ability(GraspOfTheLost.ID).build());
     }
 }

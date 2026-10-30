@@ -46,6 +46,7 @@ public final class EchelonCore implements ModInitializer {
         ekuzo.crazyworldprogression.reforge.ReforgeBranding.set(new ekuzo.crazyworldprogression.reforge.ReforgeBranding(
                 "Soulforging", "Reforge soul", "Soul reforged: ", "Soulweaving"));
         EchelonAdminModule.register();
+        ekuzo.echeloncore.encounter.BossEncounters.register();
         RandomEventRegistry.registerSource(MOD_ID, MOD_ID, "random-events.yml");
         BaselineStatRegistry.registerSource(id("default-baseline"), MOD_ID, "baseline-stats.yml");
         SkillTreeRegistry.registerSource(MOD_ID, MOD_ID, "skilltrees");
@@ -60,6 +61,7 @@ public final class EchelonCore implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             KingCommands.register(dispatcher);
             VeilCommands.register(dispatcher);
+            ekuzo.echeloncore.encounter.BossEncounterCommands.register(dispatcher);
             ekuzo.crazyworldprogression.worldboundary.bonus.BonusAreas.registerCommands(dispatcher, "kingdomarea");
         });
         LOGGER.info("Initialized Echelon gameplay systems");

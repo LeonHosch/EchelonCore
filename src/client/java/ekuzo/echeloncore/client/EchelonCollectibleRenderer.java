@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.world.entity.LivingEntity;
 
-/** Mounts and pets drawn with an existing Echelon mob's model, texture and glow (the stag mount, the Leshen pet). */
+/** Mounts and pets drawn with a GeckoLib model, texture and glow (the stag and unicorn mounts, the Leshen pet). */
 public final class EchelonCollectibleRenderer<T extends LivingEntity & GeoEntity> extends GeoEntityRenderer<T, LivingEntityRenderState> {
     public EchelonCollectibleRenderer(EntityRendererProvider.Context context, String model, float scale, float shadowRadius) {
         super(context, new DefaultedEntityGeoModel<>(EchelonCore.id(model)));
@@ -27,6 +27,8 @@ public final class EchelonCollectibleRenderer<T extends LivingEntity & GeoEntity
     public static void register() {
         EntityRendererRegistry.register(EchelonEntities.STAG_MOUNT,
                 context -> new EchelonCollectibleRenderer<>(context, "corrupted_stag", 1.0F, 1.1F));
+        EntityRendererRegistry.register(EchelonEntities.UNICORN_MOUNT,
+                context -> new EchelonCollectibleRenderer<>(context, "unicorn", 1.0F, 0.9F));
         EntityRendererRegistry.register(EchelonEntities.LESHEN_PET,
                 context -> new EchelonCollectibleRenderer<>(context, "leshen", LeshenPet.SCALE, 0.25F));
     }

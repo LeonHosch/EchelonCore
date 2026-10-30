@@ -40,6 +40,15 @@ public final class EchelonMobRenderer<T extends Monster & GeoEntity> extends Geo
             }
         });
         this.shadowRadius = shadowRadius;
+        this.deathFlip = type != EchelonEntities.HOLLOWED_PENITENT;
+    }
+
+    /** False for mobs whose death animation shows the death (the Hollowed Penitent kneels and slumps, no flip). */
+    private final boolean deathFlip;
+
+    @Override
+    protected float getDeathMaxRotation(com.geckolib.renderer.base.GeoRenderState renderState) {
+        return deathFlip ? super.getDeathMaxRotation(renderState) : 0.0F;
     }
 
     private static final DataTicket<Integer> CAST_PHASE = DataTicket.create("echelon_cast_phase", Integer.class);
@@ -62,6 +71,10 @@ public final class EchelonMobRenderer<T extends Monster & GeoEntity> extends Geo
         EntityRendererRegistry.register(EchelonEntities.ROOT_SNARE, RootSnareRenderer::new);
         EntityRendererRegistry.register(EchelonEntities.FALSEKIN,
                 context -> new EchelonMobRenderer<>(context, EchelonEntities.FALSEKIN, 0.7F));
+        EntityRendererRegistry.register(EchelonEntities.VOID_WRAITH,
+                context -> new EchelonMobRenderer<>(context, EchelonEntities.VOID_WRAITH, 0.6F));
+        EntityRendererRegistry.register(EchelonEntities.HOLLOWED_PENITENT,
+                context -> new EchelonMobRenderer<>(context, EchelonEntities.HOLLOWED_PENITENT, 1.0F));
     }
 
     @Override
